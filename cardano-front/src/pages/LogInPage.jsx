@@ -1,5 +1,5 @@
-import { Box, Container, Heading } from "@chakra-ui/react";
-import LogForm from "../components/LogForm.jsx";
+import {Box, Container, Heading, Link } from "@chakra-ui/react";
+import LogForm  from "../components/LogForm.jsx";
 
 const RegisterPage = () => {
     return (
@@ -9,6 +9,9 @@ const RegisterPage = () => {
                     Connexion
                 </Heading>
                 <LogForm />
+                <Box textAlign="center" mt={4}>
+                    <Link href="/register">Pas encore inscrit ? Créez un compte ici</Link>
+                </Box>
             </Container>
         </Box>
     );
