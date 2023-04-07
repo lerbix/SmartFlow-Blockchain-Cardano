@@ -4,6 +4,7 @@ import {ChakraProvider, Text} from "@chakra-ui/react";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import LogInPage from "./pages/LogInPage.jsx";
+import Dashboard from "./components/DashBoard/DashBoard.jsx";
 
 function App() {
   const [count, setCount] = useState(0)
@@ -14,6 +15,7 @@ function App() {
               <Routes>
                   <Route path="/" element={<LogInPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
               </Routes>
           </Router>
       </ChakraProvider>
