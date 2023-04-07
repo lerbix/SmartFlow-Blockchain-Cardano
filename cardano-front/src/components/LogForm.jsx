@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
     FormControl,
     FormLabel,
@@ -14,10 +15,12 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
+
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             await AuthenticationService.login(email, password);
+            window.location.href = "/dashboard";
             console.log('Utilisateur connecté');
         } catch (error) {
             setError(error.message);

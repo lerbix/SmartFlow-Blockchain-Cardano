@@ -17,6 +17,7 @@ const RegistrationForm = () => {
         try {
             await AuthenticationService.register(email, password, firstName, lastName, birthdate);
             console.log('Utilisateur inscrit');
+            window.location.href = "/dashboard";
             setIsSuccess(true);
             setIsError(false);
         } catch (error) {
