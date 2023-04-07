@@ -56,6 +56,8 @@ const Dashboard = () => {
 
 
     return (
+
+
         <Box>
             <Heading size="md">Tableau de bord</Heading>
             {isLoading && <Spinner />}
@@ -67,6 +69,7 @@ const Dashboard = () => {
                         <p>Nom : {user.lastName}</p>
                         <p>Date de naissance : {user.birthDate}</p>
                         <Button colorScheme="red" mt={4} onClick={handleLogout}>Déconnexion</Button>
+                        <Button colorScheme="yellow" mt={4} ml={4} onClick={ ()=>window.location.href = "/edit-profile"} >Modifier</Button>
                     </Box>
                 </Card>
             )}
