@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import firebaseConfig from "../utils/firebaseConfig.js";
 
 // Initialize Firebase
@@ -8,12 +9,24 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
+
 class AuthenticationService {
 
     // Méthode pour inscrire un nouvel utilisateur
-    async register(email, password) {
+    async register(email, password, firstName, lastName, birthdate) {
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
+
+            // Ajouter les données utilisateur personnalisées dans la base de données Firestore
+            const userDocRef = doc(db, 'users', result.user.uid);
+            await setDoc(userDocRef, {
+                firstName : firstName,
+                lastName : lastName,
+                birthDate : birthdate,
+            });
+
             return result.user;
         } catch (error) {
             throw new Error(error.message);

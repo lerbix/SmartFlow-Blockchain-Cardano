@@ -4,6 +4,9 @@ import AuthenticationService from "../services/AuthenticationService.js";
 // import { auth } from "../firebase";
 
 const RegistrationForm = () => {
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [birthdate, setBirthdate] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
@@ -12,7 +15,7 @@ const RegistrationForm = () => {
     const handleRegister = async (event) => {
         event.preventDefault();
         try {
-            await AuthenticationService.register(email, password);
+            await AuthenticationService.register(email, password, firstName, lastName, birthdate);
             console.log('Utilisateur inscrit');
             setIsSuccess(true);
             setIsError(false);
@@ -37,6 +40,36 @@ const RegistrationForm = () => {
                     Une erreur est survenue, veuillez réessayer.
                 </Alert>
             )}
+
+            <FormControl id="firstName" isRequired>
+                <FormLabel>First Name</FormLabel>
+                <Input
+                    type="text"
+                    placeholder="Enter your first name"
+                    value={firstName}
+                    onChange={(event) => setFirstName(event.target.value)}
+                />
+            </FormControl>
+
+            <FormControl id="lastName" isRequired>
+                <FormLabel>Last Name</FormLabel>
+                <Input
+                    type="text"
+                    placeholder="Enter your last name"
+                    value={lastName}
+                    onChange={(event) => setLastName(event.target.value)}
+                />
+            </FormControl>
+
+            <FormControl id="birthdate" isRequired>
+                <FormLabel>Date of Birth</FormLabel>
+                <Input
+                    type="date"
+                    placeholder="Enter your date of birth"
+                    value={birthdate}
+                    onChange={(event) => setBirthdate(event.target.value)}
+                />
+            </FormControl>
 
             <FormControl id="email" isRequired>
                 <FormLabel>Email address</FormLabel>
