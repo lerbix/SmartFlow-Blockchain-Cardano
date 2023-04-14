@@ -91,7 +91,7 @@ const RegistrationForm = () => {
                     onChange={(event) => setPassword(event.target.value)}
                 />
             </FormControl>
-            <Button mt={4} colorScheme="teal" onClick={handleRegister}>
+            <Button mt={4} w={"full"} colorScheme="teal" onClick={handleRegister}>
                 Register
             </Button>
         </Box>

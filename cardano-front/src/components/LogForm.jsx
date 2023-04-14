@@ -51,7 +51,7 @@ const LoginForm = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </FormControl>
-            <Button type="submit" colorScheme="blue" mt="4">
+            <Button w={"full"} type="submit" colorScheme="blue" mt="4">
                 Login
             </Button>
         </form>
