@@ -9,19 +9,33 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cardano-foundation/cardano-connect-with-wallet": "^0.1.53",
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
+    "@emurgo/cardano-serialization-lib-asmjs": "^11.3.1",
+    "@emurgo/cardano-serialization-lib-browser": "^11.3.1",
+    "@emurgo/cardano-serialization-lib-nodejs": "^11.3.1",
+    "@meshsdk/core": "^1.5.2",
+    "@meshsdk/react": "^1.1.7",
+    "bip39": "^3.1.0",
+    "cardano-wallet": "^1.2.2",
+    "cardano-wallet-js": "^1.4.0",
+    "cardanocli-js": "^4.1.6",
+    "crypto-js": "^4.1.1",
+    "elliptic": "^6.5.4",
     "firebase": "^9.19.1",
     "framer-motion": "^10.11.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.8.0",
     "react-router-dom": "^6.10.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",
-    "vite": "^4.2.0"
+    "vite": "^4.2.0",
+    "vite-plugin-wasm": "^3.2.2"
   }
 }
