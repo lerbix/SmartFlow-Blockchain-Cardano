@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
-import {Box, Button, Card, Heading, Spinner} from "@chakra-ui/react";
+import {Box, Button, Card, Container, Heading, Spinner} from "@chakra-ui/react";
 import AuthenticationService from "../../services/AuthenticationService.js";
 
 // Initialize Firebase
@@ -58,22 +58,37 @@ const Dashboard = () => {
     return (
 
 
-        <Box>
-            <Heading size="md">Tableau de bord</Heading>
-            {isLoading && <Spinner />}
-            {user && (
-                <Card>
-                    <Box p={4}>
-                        <p>Utilisateur connecté : {user.email}</p>
-                        <p>Prénom : {user.firstName}</p>
-                        <p>Nom : {user.lastName}</p>
-                        <p>Date de naissance : {user.birthDate}</p>
-                        <Button colorScheme="red" mt={4} onClick={handleLogout}>Déconnexion</Button>
-                        <Button colorScheme="yellow" mt={4} ml={4} onClick={ ()=>window.location.href = "/edit-profile"} >Modifier</Button>
-                    </Box>
-                </Card>
-            )}
-        </Box>
+        <Container>
+            <Box>
+                <Heading size="md" p={4}>Tableau de bord</Heading>
+                {isLoading && <Spinner
+                    thickness='4px'
+                    speed='0.65s'
+                    emptyColor='gray.200'
+                    color='blue.500'
+                    size='xl'
+                />}
+                {user && (
+                    <Card>
+                        <Box p={4}>
+                            <p>Utilisateur connecté : {user.email}</p>
+                            <p>Prénom : {user.firstName}</p>
+                            <p>Nom : {user.lastName}</p>
+                            <p>Date de naissance : {user.birthDate}</p>
+                            <Button colorScheme="red" mt={4} onClick={handleLogout}>Déconnexion</Button>
+                            <Button colorScheme="yellow" mt={4} ml={4} onClick={ ()=>window.location.href = "/edit-profile"} >Modifier profil</Button>
+                            <Button colorScheme="blue" mt={4} ml={4} onClick={ ()=>window.location.href = "/wallet"} >Wallet</Button>
+                        </Box>
+                    </Card>
+                )}
+            </Box>
+
+
+
+        </Container>
+
+
+
 
     );
 };
