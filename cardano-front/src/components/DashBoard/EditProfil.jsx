@@ -4,7 +4,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
 import {Box, Button, FormControl, FormLabel, Input, Heading, Spinner} from "@chakra-ui/react";
-import AuthenticationService from "../../services/AuthenticationService.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -15,7 +14,7 @@ const auth = getAuth(app);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
-const EditForm = () => {
+const EditProfil = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [firstName, setFirstName] = useState("");
@@ -88,4 +87,4 @@ const EditForm = () => {
     );
 }
 
-export default EditForm;
+export default EditProfil;
