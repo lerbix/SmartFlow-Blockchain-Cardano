@@ -19,6 +19,7 @@
     "@meshsdk/core": "^1.5.2",
     "@meshsdk/react": "^1.1.7",
     "bip39": "^3.1.0",
+    "blakejs": "^1.2.1",
     "cardano-wallet": "^1.2.2",
     "cardano-wallet-js": "^1.4.0",
     "cardanocli-js": "^4.1.6",
