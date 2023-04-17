@@ -13,6 +13,10 @@ import {initializeApp} from "firebase/app";
 import firebaseConfig from "../../utils/firebaseConfig.js";
 import {getAuth} from "firebase/auth";
 import {doc, getDoc, getFirestore, updateDoc} from "firebase/firestore";
+import { useToast } from "@chakra-ui/react";
+
+
+
 
 
 // Initialize Firebase
@@ -34,6 +38,8 @@ function SendFile({buildSendTransaction}) {
     const [formError, setFormError] = useState("");
     const [passphrase, setPassphrase] = useState("");
 
+// Dans la fonction handleSubmit
+    const toast = useToast();
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
         setEmailError("");
@@ -84,6 +90,13 @@ function SendFile({buildSendTransaction}) {
         try {
             // Envoyer la requête POST avec l'instance de FormData
             const response = await axios.post("http://localhost:3002/send-file", formData);
+            toast({
+                title: "Réponse du serveur",
+                description: "Transaction ID : " + response.data.txid,
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
             console.log("Réponse du serveur :", response.data);
         } catch (error) {
             console.error(error);
