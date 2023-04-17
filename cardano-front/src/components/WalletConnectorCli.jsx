@@ -73,6 +73,7 @@ const WalletConnectorCli = () => {
         try {
             const userDocRef = doc(db, "users", user.uid);
             await updateDoc(userDocRef, {
+                walletId: walletData.walletId,
                 walletAddress: walletData.walletAddress.id,
                 publicKey: walletData.accountKey,
 
