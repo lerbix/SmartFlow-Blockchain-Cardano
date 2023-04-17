@@ -148,8 +148,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     fileHash = calculatedHash;
     console.log('Le hash du fichier est : ' + fileHash);
 
-
-
     // ETAPE 2 : ENVOIE A LA BLOCKCHAIN
 
     // 2.A Récupérez l'adresse de portefeuille associée au Destinateur dans la collection "users"
@@ -165,24 +163,18 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         1: {
             "hash": fileHash,
         }
-
+        // TODO : add or edit metaData
     };
 
     //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
     //const amounts = [1000000]; // ADA
     //let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
     //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
-    console.log(transaction.metadata); //af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
+    //console.log(transaction.metadata); //af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
 
 
-    // Chiffrer le fichier avec la clé publique du destinataire
-    const publicKey = infoDestinataire.pkDest; // La clé publique du destinataire
-    const fileData = fs.readFileSync(file.path);
-    const encodedPublicKey = CardanoCrypto.PublicKey.fromBuffer(Buffer.from(publicKey, 'hex')).toX509SubjectPublicKeyInfo();
-    const encryptedFile = crypto.publicEncrypt(encodedPublicKey, fileData);
-
-    // Enregistrer le fichier chiffré dans IPFS
-    const { cid } = await ipfs.add(encryptedFile);
+    // TODO : Chiffrer le fichier avec la clé publique du destinataire
+    // TODO : envoie le fichier crypté sur IPFS
 
     console.log(cid);
 
