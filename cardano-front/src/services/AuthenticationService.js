@@ -22,6 +22,7 @@ class AuthenticationService {
             // Ajouter les données utilisateur personnalisées dans la base de données Firestore
             const userDocRef = doc(db, 'users', result.user.uid);
             await setDoc(userDocRef, {
+                email: email,
                 firstName : firstName,
                 lastName : lastName,
                 birthDate : birthdate,
