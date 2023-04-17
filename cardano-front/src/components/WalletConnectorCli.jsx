@@ -127,7 +127,7 @@ const WalletConnectorCli = () => {
                         placeholder="Entrez votre phrase mnémonique"
                     />
                     <Text fontSize="sm">
-                        La phrase mnémonique est une série de 12 à 24 mots utilisée pour
+                        La phrase mnémonique doit etre une série de "24" mots utilisée pour
                         restaurer votre portefeuille en cas de perte de vos clés privées.
                     </Text>
                 </FormControl>

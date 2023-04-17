@@ -40,7 +40,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
     try{
         let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
         let wallet = await walletServer.createOrRestoreShelleyWallet(name,mnemonic_sentence ,passphrase);
-
+        //console.log(wallet);
         // Creation
         let rootKey = Seed.deriveRootKey(mnemonic);
         let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
@@ -49,12 +49,12 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
         const data = {
             walletId : wallet.id,
             walletName: wallet.name,
-            walletState: wallet.state.status,
+            walletState:  wallet.state.status,
             walletAvailableBalance: wallet.getAvailableBalance(),
             walletRewardBalance : wallet.getRewardBalance(),
             walletTotalBalance : wallet.getTotalBalance(),
-            walletAddress: await wallet.getAddressAt(0),
-            privateKey: privateKey.to_bech32(),
+            walletAddress: wallet.getAddressAt(0),
+            privateKey:  privateKey.to_bech32(),
             accountKey: accountKey.to_bech32(),
         }
         return data;
@@ -75,11 +75,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             // KEY HANDLING
             let rootKey = Seed.deriveRootKey(mnemonic);
             let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
-            //console.log("private key : " + privateKey.to_bech32());
-
-
             let accountKey = Seed.deriveAccountKey(rootKey, 0);
-            //console.log("account key : " +  accountKey.to_bech32());
 
             const data = {
                 walletId : wallet.id,
