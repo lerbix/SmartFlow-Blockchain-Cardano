@@ -6,9 +6,8 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import LogInPage from "./pages/LogInPage.jsx";
 import Dashboard from "./components/DashBoard/DashBoard.jsx";
 import EditProfil from "./components/DashBoard/EditProfil.jsx";
-import SendFilePage from "./pages/SendFilePage.jsx";
-import SendFile from "./components/SendFile.jsx";
 import WalletConnectorCli from "./components/WalletConnectorCli.jsx";
+import SendFile from "./components/SendFile/SendFile.jsx";
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,8 +20,7 @@ function App() {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/edit-profile" element={<EditProfil />} />
-                  <Route path="/wallet" element={<SendFile />} />
-                  <Route path={"/send-file"} element={<SendFilePage />} />
+                  <Route path={'/send-file'} element={<SendFile/>} />
                   <Route path={"/walletCli"} element={<WalletConnectorCli/>} />
               </Routes>
           </Router>
