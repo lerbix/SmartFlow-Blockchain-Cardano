@@ -179,7 +179,7 @@ const WalletConnectorCli = () => {
                             </Box>
 
                         </Stack>
-                        <Button my={4} onClick={saveWalletInfo} colorScheme={"yellow"} >Link to informations to account</Button>
+                        <Button my={4} onClick={saveWalletInfo} colorScheme={"yellow"} >Link wallet to your account</Button>
                     </Box>
 
                 )}
