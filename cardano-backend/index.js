@@ -42,6 +42,9 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
         let wallet = await walletServer.createOrRestoreShelleyWallet(name,mnemonic_sentence ,passphrase);
 
         // Creation
+        let rootKey = Seed.deriveRootKey(mnemonic);
+        let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
+        let accountKey = Seed.deriveAccountKey(rootKey, 0);
 
         const data = {
             walletId : wallet.id,
