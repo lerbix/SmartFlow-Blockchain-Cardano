@@ -78,7 +78,7 @@ const Dashboard = () => {
                             <Button colorScheme="red" mt={4} onClick={handleLogout}>Déconnexion</Button>
                             <Button colorScheme="yellow" mt={4} ml={4} onClick={ ()=>window.location.href = "/edit-profile"} >Modifier profil</Button>
                             <Button colorScheme="blue" mt={4} ml={4} onClick={ ()=>window.location.href = "/send-file"} >Send</Button>
-                            <Button onClick={()=>window.location.href = "/walletCli"}>
+                            <Button my={3} onClick={()=>window.location.href = "/walletCli"}>
                                 Connect With Cardano Wallet CLI
                             </Button>
                         </Box>
