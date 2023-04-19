@@ -8,6 +8,9 @@ const crypto = require("crypto");
 const fs = require("fs");
 const admin = require('firebase-admin');
 const serviceAccount = require("./key.json");
+const ipfsAPI = require ('ipfs-api');
+const ipfs = ipfsAPI('127.0.0.1', '5001', {protocol: 'http'});
+var nodemailer = require('nodemailer');
 
 // Initialisez Firebase Admin SDK avec vos identifiants Firebase
 admin.initializeApp({
@@ -53,7 +56,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             walletAvailableBalance: wallet.getAvailableBalance(),
             walletRewardBalance : wallet.getRewardBalance(),
             walletTotalBalance : wallet.getTotalBalance(),
-            walletAddress: wallet.getAddressAt(0),
+            walletAddress:await wallet.getAddressAt(0),
             privateKey:  privateKey.to_bech32(),
             accountKey: accountKey.to_bech32(),
         }
@@ -145,8 +148,8 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
             resolve(hash.digest('hex'));
         });
     });
-    fileHash = calculatedHash;
-    console.log('Le hash du fichier est : ' + fileHash);
+    const hashFile = calculatedHash;
+    //console.log('Le hash du fichier est : ' + fileHash);
 
     // ETAPE 2 : ENVOIE A LA BLOCKCHAIN
 
@@ -161,39 +164,59 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     const senderWallet = await walletServer.getShelleyWallet(walletId);
     const metadata = {
         1: {
-            "hash": fileHash,
+            "hash": hashFile,
         }
         // TODO : add or edit metaData
     };
 
-    //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
-    //const amounts = [1000000]; // ADA
-    //let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
+
+
+    let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
+    const amounts = [1000000]; // ADA
+    let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
     //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
-    //console.log(transaction.metadata); //af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
+    console.log(transaction.metadata); //af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
 
 
     // TODO : Chiffrer le fichier avec la clé publique du destinataire
     // TODO : envoie le fichier crypté sur IPFS
-
-    console.log(cid);
-
-
-
-
-
-
-
+    const fileContent = fs.readFileSync(file.path);
+    try {
+        const fileAdded = await ipfs.add(fileContent);
+        console.log(fileAdded);
+        const fileHash = await fileAdded[0].hash;
+        console.log(`File uploaded to IPFS. CID: ${fileHash}`);
+        res.status(200).send({ hash: fileHash });
 
 
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: '******',
+                pass: '********'
+            }
+        });
 
+        var mailOptions = {
+            from: '*******',
+            to: '******',
+            subject: 'File uploaded to IPFS',
+            html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${fileHash}">Download File</a></p><p>Thank you for using our service!</p>`
+        };
 
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
 
-
-
+    } catch (error) {
+        console.error('Error uploading file to IPFS:', error);
+        res.status(500).send('Error uploading file to IPFS');
+    }
 });
-
-
 
 
 
