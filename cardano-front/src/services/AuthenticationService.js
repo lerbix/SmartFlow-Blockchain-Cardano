@@ -26,6 +26,9 @@ class AuthenticationService {
                 firstName : firstName,
                 lastName : lastName,
                 birthDate : birthdate,
+                publicKey:"",
+                walletId:"",
+                walletAddress:"",
             });
 
             return result.user;
