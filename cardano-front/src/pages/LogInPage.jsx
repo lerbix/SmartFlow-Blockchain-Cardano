@@ -12,7 +12,13 @@ const RegisterPage = () => {
                 <Box textAlign="center" mt={4}>
                     Pas encore inscrit ?
                     <Link href="/register" color='blue.500'  ml={2}>Créez un compte ici</Link>
+
                 </Box>
+                <Box textAlign="center" mt={4}>
+                    Mot de passe oublié?
+                <Link href="/forget-password" color='blue.500'  ml={2}>Reset password</Link>
+                </Box>
+
             </Container>
         </Box>
     );
