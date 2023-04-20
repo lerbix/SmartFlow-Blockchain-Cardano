@@ -10,6 +10,7 @@ import {
     Text,
 } from "@chakra-ui/react";
 import firebaseConfig from "../utils/firebaseConfig.js";
+import AuthenticationService from "../services/AuthenticationService.js";
 const app = initializeApp(firebaseConfig);
 
 function ResetPasswordForm() {
@@ -39,6 +40,7 @@ function ResetPasswordForm() {
                 Réinitialisation de mot de passe
             </Heading>
            <Card>
+               <text> Entrez l'adresse email associé à votre compte pour modifier votre mot de passe.</text>
         <Box maxW="md" mx="auto" p={4}>
             <FormControl>
                 <FormLabel>Email :</FormLabel>
@@ -53,7 +55,12 @@ function ResetPasswordForm() {
                 Réinitialiser votre mot de passe
             </Button>
             {message && <Text mt={4}>{message}</Text>
-            }
+               }
+            {message.startsWith("Un email") && (
+                <Button colorScheme="blue" mt={4} onClick={()=>window.location.href = "/"}>
+                    Se connecter de nouveau
+                </Button>
+                )}
         </Box>
            </Card>
             </Box>
