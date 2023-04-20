@@ -6,7 +6,14 @@ import {
     Input,
     FormErrorMessage,
     Button,
-    Text, Badge,
+    Text,
+    Badge,
+    AlertDialog,
+    AlertDialogOverlay,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogBody,
+    AlertDialogFooter, ModalContent, ModalBody, Modal, ModalOverlay, ModalHeader,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -37,6 +44,9 @@ function SendFile({buildSendTransaction}) {
     const [fileError, setFileError] = useState("");
     const [formError, setFormError] = useState("");
     const [passphrase, setPassphrase] = useState("");
+    const [link, setLink] = useState("");
+    const [showLink, setShowLink] = useState(false);
+
 
 // Dans la fonction handleSubmit
     const toast = useToast();
@@ -98,10 +108,12 @@ function SendFile({buildSendTransaction}) {
                 isClosable: true,
             });
             console.log("Réponse du serveur :", response.data);
+            setLink("https://ipfs.io/ipfs/" + response.data.hash);
+            setLink("https://ipfs.io/ipfs/" + response.data.hash);
+            setShowLink(true);
         } catch (error) {
             console.error(error);
         }
-
     };
 
 
@@ -136,6 +148,38 @@ function SendFile({buildSendTransaction}) {
                 <Button type="submit" mt={4}>
                     Envoyer
                 </Button>
+                <Button  mt={4} ml={4} colorScheme="gray" onClick={()=> window.location.href ="/dashboard"}>
+                    retour
+                </Button>
+                {showLink && (
+                    <Box
+                        position="fixed"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        zIndex={10}
+                    >
+                    <Modal isOpen={showLink} onClose={() => setShowLink(false)}>
+                        <ModalOverlay />
+                        <ModalContent>
+                            <ModalHeader>Voici votre lien</ModalHeader>
+                            <ModalBody>
+
+                                    <Text fontSize="lg">
+                                        Link:{" "}
+                                        <a href={link} target="_blank" rel="noopener noreferrer">
+                                            {link}
+                                        </a>
+                                    </Text>
+                                    <Button mt={4} onClick={() => setShowLink(false)}>
+                                        Fermer
+                                    </Button>
+                            </ModalBody>
+                        </ModalContent>
+                    </Modal>
+                    </Box>
+                )}
+
             </form>
         </Box>
     );
