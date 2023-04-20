@@ -34,7 +34,13 @@ const RegistrationForm = () => {
                 window.location.href = "/dashboard";
                 setIsSuccess(true);
                 setIsError(false);
-
+                toast({
+                    title: "Success",
+                    description: "Registration successful!",
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                });
             } catch (error) {
                 console.log('Failed :  ' + error);
                 setIsSuccess(false);
@@ -42,6 +48,13 @@ const RegistrationForm = () => {
             }
         }else{
             setIsError(true);
+            toast({
+                title: "Error",
+                description: error,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         }
     };
 
