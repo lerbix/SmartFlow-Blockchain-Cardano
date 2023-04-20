@@ -7,7 +7,7 @@ import {
     FormControl,
     FormLabel, Heading,
     Input,
-    Text,
+    Text, useToast,
 } from "@chakra-ui/react";
 import firebaseConfig from "../utils/firebaseConfig.js";
 import AuthenticationService from "../services/AuthenticationService.js";
@@ -16,6 +16,7 @@ const app = initializeApp(firebaseConfig);
 function ResetPasswordForm() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
+    const toast = useToast();
 
     function resetPassword() {
         const auth = getAuth();
@@ -26,12 +27,21 @@ function ResetPasswordForm() {
                 setMessage(
                     "Un email de réinitialisation de mot de passe a été envoyé à votre adresse email."
                 );
+                toast({
+                    title: "Réinitialisation du mot de passe réussie",
+                    description: "Un e-mail de réinitialisation du mot de passe a été envoyé à votre adresse e-mail.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
             })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                setMessage(`Erreur : ${errorCode} - ${errorMessage}`);
-            });
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error(errorCode, errorMessage);
+
+            setMessage("Il y a eu une erreur lors de la réinitialisation du mot de passe.");
+        });
     }
 
     return (
