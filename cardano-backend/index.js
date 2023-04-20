@@ -74,7 +74,6 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
 
             //console.log(wallet);
 
-
             // KEY HANDLING
             let rootKey = Seed.deriveRootKey(mnemonic);
             let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
@@ -192,14 +191,14 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: '******',
+                user: 'bkl.abdel7@gmail.com',
                 pass: '********'
             }
         });
 
         var mailOptions = {
-            from: '*******',
-            to: '******',
+            from: 'bkl.abdel7@gmail.com',
+            to: 'abderrahmanebkl48@gmail.com',
             subject: 'File uploaded to IPFS',
             html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${fileHash}">Download File</a></p><p>Thank you for using our service!</p>`
         };
