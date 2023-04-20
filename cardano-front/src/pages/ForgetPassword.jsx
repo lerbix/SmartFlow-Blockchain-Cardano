@@ -73,6 +73,9 @@ function ResetPasswordForm() {
                 )}
         </Box>
            </Card>
+                <Button  mt={4} onClick={()=>window.location.href = "/"}>
+                    Retour
+                </Button>
             </Box>
         </Container>
     );
