@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, FormControl, FormLabel, Input, Alert, AlertIcon } from "@chakra-ui/react";
+import {Box, Button, FormControl, FormLabel, Input, Alert, AlertIcon, useToast} from "@chakra-ui/react";
 import AuthenticationService from "../services/AuthenticationService.js";
 // import { auth } from "../firebase";
 
@@ -11,18 +11,36 @@ const RegistrationForm = () => {
     const [password, setPassword] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
     const [isError, setIsError] = useState(false);
+    const toast = useToast();
+    const [error, setError] = useState('');
 
+    const handlePasswordValidation = () => {
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters long');
+            return false;
+        }
+        if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])/.test(password)) {
+            setError('Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character');
+            return false;
+        }
+        return true;
+    }
     const handleRegister = async (event) => {
         event.preventDefault();
-        try {
-            await AuthenticationService.register(email, password, firstName, lastName, birthdate);
-            console.log('Utilisateur inscrit');
-            window.location.href = "/dashboard";
-            setIsSuccess(true);
-            setIsError(false);
-        } catch (error) {
-            console.log('Failed :  ' + error );
-            setIsSuccess(false);
+        if (handlePasswordValidation()) {
+            try {
+                await AuthenticationService.register(email, password, firstName, lastName, birthdate);
+                console.log('Utilisateur inscrit');
+                window.location.href = "/dashboard";
+                setIsSuccess(true);
+                setIsError(false);
+
+            } catch (error) {
+                console.log('Failed :  ' + error);
+                setIsSuccess(false);
+                setIsError(true);
+            }
+        }else{
             setIsError(true);
         }
     };
