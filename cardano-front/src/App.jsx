@@ -9,7 +9,7 @@ import EditProfil from "./components/DashBoard/EditProfil.jsx";
 import WalletConnectorCli from "./components/WalletConnectorCli.jsx";
 import SendFile from "./components/SendFile/SendFile.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
-
+import ReceivePage from "./components/SendFile/recieiveFile.jsx";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -17,6 +17,7 @@ function App() {
       <ChakraProvider>
           <Router>
               <Routes>
+                  <Route path="/recieve-file" element={<ReceivePage />} />
                   <Route path="/forget-password" element={<ForgetPassword />} />
                   <Route path="/" element={<LogInPage />} />
                   <Route path="/register" element={<RegisterPage />} />
