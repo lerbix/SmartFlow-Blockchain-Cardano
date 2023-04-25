@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import {Input, Button, FormLabel} from "@chakra-ui/react";
-import axios from "axios";
+import {
+    Box,
+    Card,
+    CardHeader,
+    CardBody,
+    FormLabel,
+    Input,
+    Button,
+} from "@chakra-ui/react";import axios from "axios";
 import { useToast } from "@chakra-ui/react";
 
 const MyComponent = () => {
@@ -67,7 +74,7 @@ const MyComponent = () => {
         <Box maxW="md" mx="auto" mt="8">
             <Card>
                 <CardHeader textAlign="center" fontWeight="bold">
-                    Decrypt File
+                    Recieve File
                 </CardHeader>
                 <CardBody>
                     <FormLabel>CID :</FormLabel>
