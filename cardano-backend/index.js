@@ -217,8 +217,80 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     }
 });
 
+//Recieve file Part
+app.post('/decrypt-file',upload.none(), async (req, res) => {
+    console.log(req.body);
+    const { cid, privateKey } = req.body;
 
+    // do something with the CID here
+    console.log(`Received CID: `+cid);
+    console.log(`Received PrivateKey: `+privateKey);
 
+    // send a response back to the frontend
+    res.send({ message: 'CID and privateKey received successfully' });
+
+    //TODO Download the ECRYPTED file from IPFS
+
+    const fileHash = 'Qmc3KPq3to4wmzGgt24K6swnQ9Xtmzi56kGPxfQig7fKiV';
+    /*
+    ipfs.files.get(fileHash, function (err, files) {
+        files.forEach((file) => {
+            console.log(file.path)
+            console.log("File content >> ",file.content.toString('utf8'))
+        })
+    })
+     */
+    const encryptedFile = await getFileFromIPFS(fileHash);
+    console.log(encryptedFile);
+    //TODO Decrypt the file using the private key of the receiver
+    //const decryptedFile = decryptFile(encryptedFile, privateKey);
+    //TODO HASH the file
+    /*
+    const hashedFile = hashFile(decryptedFile);
+    console.log(hashedFile);
+     */
+    //TODO compare the hashes
+    /*
+    const originalHash = 'abc123';
+    const match = (hashedFile === originalHash);
+    */
+    //TODO Accusé de reception
+     /*
+    if (match) {
+        console.log('File received and verified.');
+    } else {
+        console.log('Error: File hash does not match.');
+    }
+*/
+
+});
+
+function getFileFromIPFS(fileHash) {
+    return new Promise((resolve, reject) => {
+        ipfs.files.get(fileHash, function (err, files) {
+            if (err) {
+                reject(err);
+            } else {
+                files.forEach((file) => {
+                    console.log(file.path)
+                    console.log("File content >> ",file.content.toString('utf8'))
+                    resolve(file.content.toString('utf8'));
+                });
+            }
+        });
+    });
+}
+
+function decryptFile(encryptedFile, privateKey) {
+    // TODO: implement file decryption
+    return decryptedFile;
+}
+
+function hashFile(file) {
+    const hash = crypto.createHash('sha256');
+    hash.update(file);
+    return hash.digest('hex');
+}
 async function getInfoDestinataireFromEmail(email){
     const userRecord = await admin.auth().getUserByEmail(email);
     const usersRef = admin.firestore().collection('users');
