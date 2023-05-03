@@ -95,6 +95,7 @@ function SendFile({buildSendTransaction}) {
         formData.append("file", file);
         formData.append("passphrase", passphrase);
         formData.append("walletId", userData.walletId);
+        formData.append("userId",user.uid)
 
 
         try {
