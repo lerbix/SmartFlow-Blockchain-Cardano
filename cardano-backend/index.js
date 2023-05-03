@@ -107,6 +107,53 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
 }
 
 
+function generateKeyPair() {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048, // Longueur de la clé en bits
+        publicKeyEncoding: {
+            type: 'spki',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs8',
+            format: 'pem'
+        }
+    });
+
+    return { publicKey, privateKey };
+}
+
+app.post('/register', async (req, res) => {
+    const { userId } = req.body;
+    console.log('User Id: ' + userId);
+
+    const keyPair = generateKeyPair();
+    const publicKey = keyPair.publicKey;
+    const privateKey = keyPair.privateKey;
+
+    // Enregistrer les clés dans Firestore
+    const usersRef = admin.firestore().collection('users');
+
+    // Créer un document pour l'utilisateur avec l'ID correspondant
+    const userDoc = usersRef.doc(userId);
+
+    // Enregistrer la clé publique
+    await userDoc.set({
+        publicKey: publicKey
+    }, { merge: true });
+
+    // Enregistrer la clé privée (en prenant soin de bien protéger l'accès à cette donnée sensible)
+    await userDoc.set({
+        privateKey: privateKey
+    }, { merge: true });
+
+    // Répondre avec succès
+    res.status(200).send('Clés enregistrées avec succès.');
+});
+
+
+
+
 // Route pour gérer la connexion au portefeuille
 app.post('/walletCli', (req, res) => {
     const {name,passphrase, mnemonic } = req.body;
