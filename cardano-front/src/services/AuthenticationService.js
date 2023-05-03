@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import firebaseConfig from "../utils/firebaseConfig.js";
+import axios from "axios";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -18,6 +19,16 @@ class AuthenticationService {
     async register(email, password, firstName, lastName, birthdate) {
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
+
+            const userId = result.user.uid;
+            axios.post('http://localhost:3002/register', {userId })
+                .then(response => {
+                    console.log('Reponse du serveur : ' + response);
+                })
+                .catch(error => {
+                    // Gestion des erreurs ici
+                    console.log(error.response);
+                });
 
             // Ajouter les données utilisateur personnalisées dans la base de données Firestore
             const userDocRef = doc(db, 'users', result.user.uid);
