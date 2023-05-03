@@ -75,8 +75,7 @@ const WalletConnectorCli = () => {
             await updateDoc(userDocRef, {
                 walletId: walletData.walletId,
                 walletAddress: walletData.walletAddress.id,
-                publicKey: walletData.accountKey,
-
+                //publicKey: walletData.publicKey,
             });
             console.log("user modified ! ");
         } catch (error) {
