@@ -12,6 +12,15 @@ const ipfsAPI = require ('ipfs-api');
 const ipfs = ipfsAPI('127.0.0.1', '5001', {protocol: 'http'});
 var nodemailer = require('nodemailer');
 
+
+const Blockfrost = require("@blockfrost/blockfrost-js");
+const path = require("path");
+const API = new Blockfrost.BlockFrostAPI({
+    projectId: "previewD2Ua5jbVMR9r8Y2faeJuaRYvyqKCy9ko", // see: https://blockfrost.io
+});
+
+
+
 // Initialisez Firebase Admin SDK avec vos identifiants Firebase
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -353,44 +362,101 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
 
 
-    // send a response back to the frontend
-    res.send({ message: 'CID and privateKey received successfully' });
 
-    //TODO Download the ECRYPTED file from IPFS
+    // Hash du fichier de IPFS
+    const hashFileFromIPFS = await hashFromFile(fileName);
+    console.log('Hash du fichier IPFS : ' +  hashFileFromIPFS);
 
-    const fileHash = 'Qmc3KPq3to4wmzGgt24K6swnQ9Xtmzi56kGPxfQig7fKiV';
-    /*
-    ipfs.files.get(fileHash, function (err, files) {
-        files.forEach((file) => {
-            console.log(file.path)
-            console.log("File content >> ",file.content.toString('utf8'))
-        })
-    })
-     */
-    const encryptedFile = await getFileFromIPFS(fileHash);
-    console.log(encryptedFile);
-    //TODO Decrypt the file using the private key of the receiver
-    //const decryptedFile = decryptFile(encryptedFile, privateKey);
-    //TODO HASH the file
-    /*
-    const hashedFile = hashFile(decryptedFile);
-    console.log(hashedFile);
-     */
-    //TODO compare the hashes
-    /*
-    const originalHash = 'abc123';
-    const match = (hashedFile === originalHash);
-    */
-    //TODO Accusé de reception
-     /*
-    if (match) {
-        console.log('File received and verified.');
-    } else {
-        console.log('Error: File hash does not match.');
+
+    // Comparer les Hashs
+    if (compareHashes(hashFromBlockChain, hashFileFromIPFS)){
+
+        // TODO : envoie l'accusée de reception
+
+        res.status(200).send({
+            compare: true ,
+            message: "Les identifiants sont identiques",
+            fileName: fileName
+        });
+
+    }else {
+        res.status(200).send({ compare: false ,message: "Les identifiants sont différents", fileName:fileName});
     }
-*/
+
 
 });
+
+// Create a new route for serving the file
+app.get('/download/:fileName', (req, res) => {
+    const fileName = req.params.fileName;
+    const filePath = path.join(__dirname, fileName);
+
+    res.download(filePath, fileName, (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            // Delete the file after it's been downloaded
+            fs.unlinkSync(filePath);
+        }
+    });
+});
+
+function decryptFile(inputData, privateKey) {
+    const extSize = inputData.readUInt16BE(0);
+    const extBuffer = inputData.slice(2, 2 + extSize);
+    const fileExt = extBuffer.toString('utf8');
+
+    const encryptedSymmetricKey = inputData.slice(2 + extSize, 2 + extSize + 256);
+    const encryptedData = inputData.slice(2 + extSize + 256);
+
+    const symmetricKey = crypto.privateDecrypt({
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING
+    }, encryptedSymmetricKey);
+
+    const decipher = crypto.createDecipheriv('aes-256-cbc', symmetricKey, Buffer.alloc(16, 0));
+    const decryptedData = Buffer.concat([decipher.update(encryptedData), decipher.final()]);
+
+    const outputBuffer = Buffer.concat([extBuffer, decryptedData]);
+
+    return outputBuffer;
+}
+
+
+
+
+async function getMetaDataFromTx(tx){
+        const metadata = await API.txsMetadata(tx);
+        let  {json_metadata} = metadata[0];
+        const hashFile = json_metadata;
+        return hashFile;
+}
+
+
+
+async function getFileFromIPFS2(cid) {
+    try {
+        // Utilise la méthode "cat" de l'API IPFS pour récupérer le fichier à partir du CID
+        const fileData = await ipfs.cat(cid);
+        // Convertit les données du fichier en une chaîne de caractères (ou autre format selon vos besoins)
+        //const fileContent = fileData.toString();
+        // Renvoie le contenu du fichier
+        return fileData;
+    } catch (error) {
+        // En cas d'erreur, vous pouvez gérer le cas ici
+        console.error('Une erreur s\'est produite lors de la récupération du fichier depuis IPFS:', error);
+        throw error;
+    }
+}
+function compareHashes(hash1, hash2) {
+    if (hash1 === hash2) {
+        console.log('Les hachages sont identiques.');
+        return true
+    } else {
+        console.log('Les hachages sont différents.');
+        return false;
+    }
+}
 
 function getFileFromIPFS(fileHash) {
     return new Promise((resolve, reject) => {
@@ -413,10 +479,43 @@ function decryptFile(encryptedFile, privateKey) {
     return decryptedFile;
 }
 
-function hashFile(file) {
+
+async function  hashFromFile(file) {
+    const fileStream = fs.createReadStream(file);
     const hash = crypto.createHash('sha256');
-    hash.update(file);
-    return hash.digest('hex');
+    fileStream.pipe(hash);
+    const calculatedHash = await new Promise((resolve, reject) => {
+        hash.on('error', reject);
+        hash.on('finish', () => {
+            resolve(hash.digest('hex'));
+        });
+    });
+    const hashFile = calculatedHash;
+   return hashFile;
+}
+
+
+async function getInfoDestinataireFromUUID(uuid){
+    const userRecord = await admin.auth().getUser(uuid);
+    const usersRef = admin.firestore().collection('users');
+    const query = usersRef.where('email', '==', userRecord.email).limit(1);
+    const userDocs = await query.get();
+    if (userDocs.empty) {
+        console.log('Aucun utilisateur trouvé avec l\'email spécifié');
+        return null;
+    } else {
+        const userDoc = userDocs.docs[0];
+        const dataDest = {
+            uuid: userRecord.uid,
+            addressDest: userDoc.get('walletAddress'),
+            publicKey : userDoc.get('publicKey'),
+            privateKey: userDoc.get('privateKey')
+        }
+        //console.log(dataDest);
+        //console.log(`Adresse de portefeuille de destinataire : ${dataDest.addressDest}`);
+        //console.log(`Clé de public de destinataire : ${userDoc.get(dataDest.pkDest)}`);
+        return dataDest;
+    }
 }
 async function getInfoDestinataireFromEmail(email){
     const userRecord = await admin.auth().getUserByEmail(email);
@@ -428,9 +527,12 @@ async function getInfoDestinataireFromEmail(email){
         return null;
     } else {
         const userDoc = userDocs.docs[0];
+        console.log(userRecord);
         const dataDest = {
+            uuid: userRecord.uid,
             addressDest: userDoc.get('walletAddress'),
-            pkDest : userDoc.get('publicKey'),
+            publicKey : userDoc.get('publicKey'),
+            privateKey: userDoc.get('privateKey')
         }
         //console.log(dataDest);
         //console.log(`Adresse de portefeuille de destinataire : ${dataDest.addressDest}`);
@@ -439,6 +541,74 @@ async function getInfoDestinataireFromEmail(email){
     }
 }
 
+
+
+async function sendToBlockChain1(wallet, recoveryPhrase){
+
+
+    // get first unused wallet's address
+    let addresses = (await wallet.getUnusedAddresses()).slice(0, 1);
+    let amounts = [1000000];
+    // console.log(addresses);
+
+    // get ttl
+    let info = await walletServer.getNetworkInformation();
+    let ttl = info.node_tip.absolute_slot_number * 12000;
+
+    // you can include metadata
+    let data = {
+        0: 'hello',
+        1: Buffer.from('2512a00e9653fe49a44a5886202e24d77eeb998f', 'hex'),
+        4: [1, 2, {0: true}],
+        5: {
+            'key': null,
+            'l': [3, true, {}]
+        },
+        6: undefined
+    };
+
+
+    // get the tx structure with all the necessary components (inputs, outputs, change, etc).
+    let coinSelection = await wallet.getCoinSelection(addresses, amounts, data);
+
+
+    // get the signing keys (can be offline)
+    let rootKey = Seed.deriveRootKey(recoveryPhrase);
+    let signingKeys = coinSelection.inputs.map(i => {
+        let privateKey = Seed.deriveKey(rootKey, i.derivation_path).to_raw_key();
+        return privateKey;
+    });
+
+
+    // include the metadata in the build and sign process
+    let metadata = Seed.buildTransactionMetadata(data);
+    //console.log(metadata);
+    let txBuild = Seed.buildTransaction(coinSelection, ttl, {metadata: metadata});
+    //console.log(txBuild);
+    let txBody = Seed.sign(txBuild, signingKeys, metadata);
+    //console.log(txBody);
+    // submit the tx into the blockchain
+    let signed = Buffer.from(txBody.to_bytes()).toString('hex');
+    //console.log(signed);
+    //let txId = await walletServer.submitTx(signed);
+
+    //return txId; // cf8b04e3319f46b3363c42d05a4313ab4ceca58fd07a4772e3397667456dd37d
+}
+
+async function sendToBlockChain2(wallet, walletPassphrase, hash){
+    const senderWallet = wallet;
+    const metadata = {
+        0: hash
+    };
+
+    //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
+    let receiverAddress = (await senderWallet.getUnusedAddresses()).slice(0, 1);
+    const amounts = [1000000]; // ADA
+    let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
+    //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
+    //console.log(transaction);
+    return transaction;
+};
 
 
 
