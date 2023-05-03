@@ -131,7 +131,6 @@ function generateKeyPair() {
 
     return { publicKey, privateKey };
 }
-
 app.post('/register', async (req, res) => {
     const { userId } = req.body;
     console.log('User Id: ' + userId);
@@ -184,6 +183,55 @@ app.post('/walletCli', (req, res) => {
 
 
 
+app.post('/send-file2', (req, res) => {
+    let data = {
+        0: 'hello',
+        1: Buffer.from('2512a00e9653fe49a44a5886202e24d77eeb998f', 'hex'),
+        4: [1, 2, {0: true}],
+        5: {
+            'key': null,
+            'l': [3, true, {}]
+        },
+        6: undefined
+    };
+
+    let metadata = Seed.buildTransactionMetadata(data);
+
+    console.log(metadata.metadata());
+
+    res.status(200).send({ hash: metadata.metadata() });
+
+
+
+
+});
+
+
+function generateRandomKey() {
+    return crypto.randomBytes(32); // 256-bit key for AES-256
+}
+
+function encryptFile(inputPath, publicKey) {
+    const data = fs.readFileSync(inputPath);
+
+    const symmetricKey = generateRandomKey();
+    const cipher = crypto.createCipheriv('aes-256-cbc', symmetricKey, Buffer.alloc(16, 0));
+    const encryptedData = Buffer.concat([cipher.update(data), cipher.final()]);
+
+    const encryptedSymmetricKey = crypto.publicEncrypt({
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING
+    }, symmetricKey);
+
+    const extBuffer = Buffer.from(path.extname(inputPath), 'utf8');
+    const extSizeBuffer = Buffer.alloc(2);
+    extSizeBuffer.writeUInt16BE(extBuffer.length, 0);
+
+    const outputPath = inputPath.replace(/\.[^/.]+$/, "") + ".encrypted.bin";
+    fs.writeFileSync(outputPath, Buffer.concat([extSizeBuffer, extBuffer, encryptedSymmetricKey, encryptedData]));
+    return outputPath;
+}
+
 app.post('/send-file', upload.single('file'), async (req, res) => {
     const email = req.body.email;
     const walletId = req.body.walletId;
@@ -224,10 +272,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
     // ETAPE 2 : ENVOIE A LA BLOCKCHAIN
 
-    // 2.A Récupérez l'adresse de portefeuille associée au Destinateur dans la collection "users"
-    const infoDestinataire = await getInfoDestinataireFromEmail(email);
-    console.log("address Wallet Dest : " + infoDestinataire.addressDest);
-    console.log("pk Dest :" + infoDestinataire.pkDest);
 
     let wallet = await walletServer.getShelleyWallet(walletId);
 
@@ -242,13 +286,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         //res.status(200).send('Error Sending to blockChain');
     });
 
-    const senderWallet = await walletServer.getShelleyWallet(walletId);
-    const metadata = {
-        1: {
-            "hash": hashFile,
-        }
-        // TODO : add or edit metaData
-    };
 
 
 
@@ -474,10 +511,6 @@ function getFileFromIPFS(fileHash) {
     });
 }
 
-function decryptFile(encryptedFile, privateKey) {
-    // TODO: implement file decryption
-    return decryptedFile;
-}
 
 
 async function  hashFromFile(file) {
