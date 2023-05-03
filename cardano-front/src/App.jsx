@@ -10,6 +10,7 @@ import WalletConnectorCli from "./components/WalletConnectorCli.jsx";
 import SendFile from "./components/SendFile/SendFile.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import ReceivePage from "./components/SendFile/recieiveFile.jsx";
+import FileReceiver from "./components/SendFile/ReceiveFile.jsx";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -24,6 +25,7 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/edit-profile" element={<EditProfil />} />
                   <Route path={'/send-file'} element={<SendFile/>} />
+                  <Route path={'/receive-file2'} element={<FileReceiver/>} />
                   <Route path={"/walletCli"} element={<WalletConnectorCli/>} />
               </Routes>
           </Router>
