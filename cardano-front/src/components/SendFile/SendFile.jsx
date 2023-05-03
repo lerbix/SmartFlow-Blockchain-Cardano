@@ -108,8 +108,7 @@ function SendFile({buildSendTransaction}) {
                 isClosable: true,
             });
             console.log("Réponse du serveur :", response.data);
-            setLink("https://ipfs.io/ipfs/" + response.data.hash);
-            setLink("https://ipfs.io/ipfs/" + response.data.hash);
+            setLink("https://ipfs.io/ipfs/" + response.data.CID+'?filename='+response.data.CID);
             setShowLink(true);
         } catch (error) {
             console.error(error);
