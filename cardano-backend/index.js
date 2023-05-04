@@ -230,14 +230,21 @@ function encryptFile(inputPath, publicKey) {
 }
 
 app.post('/send-file', upload.single('file'), async (req, res) => {
-    const email = req.body.email;
+    const emailReceiver = req.body.emailReceiver;
     const walletId = req.body.walletId;
     const walletPassphrase = req.body.passphrase;
-    const userinfos=req.body.userId;
+    const senderUserId = req.body.userId;
+    const senderEmail = req.body.senderEmail;
+
+
+
+
     const file = req.file;
     const {originalname} = file;
-    console.log(originalname);
-    console.log("userId : "+userinfos);
+    console.log("userId : "+senderUserId);
+
+    let isHashSucces = false;
+    let isCryptSucces = false;
 
 
     // --------------------------- ETAPE 1 -------------------------------- //
@@ -245,22 +252,37 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
     // Calculer le hash du fichier en utilisant la bibliothèque crypto
 
-    const hashFile = await hashFromFile(file.path);
-    console.log('Le hash du fichier est : ' + hashFile);
+    try {
+
+    const hashFile = await hashFromFile(file.path).then(res=>{
+        isHashSucces = true;
+        console.log('Le hash du fichier est : ' + res);
+        return res;
+    }).catch(err => {
+        isHashSucces = false;
+        console.log('Erreur lors du hash du document');
+    });
+
+
 
     // --------------------------- ETAPE 2 -------------------------------- //
     // --------------------------- Crypter le document   -------------------------------- //
 
-    const dataUser = await getInfoDestinataireFromUUID(userinfos).then(res => {
+
+    const dataUser = await getInfoDestinataireFromUUID(senderUserId).then(res => {
         console.log('Information recupérées : (Public Key)');
         return  res;
     }).catch(err => {
-        console.log('Information non recuperer (Public Key)');
+        console.log('Erreur : Information non recuperé (Public Key)');
     });
+
+
 
     const publicKeyRecv = dataUser.publicKey;
     const encryptedFilePath = encryptFile(file.path, publicKeyRecv);
     console.log(`Fichier chiffré : ${encryptedFilePath}`);
+
+
 
 
     // --------------------------- ETAPE 3 -------------------------------- //
@@ -268,20 +290,16 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
 
+
     // ETAPE 2 : ENVOIE A LA BLOCKCHAIN
 
-
     let wallet = await walletServer.getShelleyWallet(walletId);
-
-    //let recoveryPhrase = "fall round bracket clip blood drink element notable conduct penalty alert glide family copper bind";
     let tx = await sendToBlockChain2(wallet, walletPassphrase, hashFile).then((result )=>{
         console.log("Envoie à la blockchain reussie !" );
         console.log("tx : " + result.id);
         return result.id;
-    }).catch((e) =>{
-        console.log("Echec envoie à la blockChain !");
-        console.log(e);
-        //res.status(200).send('Error Sending to blockChain');
+    }).catch(e => {
+        console.log('Erreur lors de Envoie à la blockChain');
     });
 
 
@@ -292,21 +310,19 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     // --------------------------- envoie à ipfs   -------------------------------- //
 
 
-       // TODO : Chiffrer le fichier avec la clé publique du destinataire
-       // TODO : envoie le fichier crypté sur IPFS
-
 
        const fileContent = fs.readFileSync(encryptedFilePath);
-       try {
+
            const fileAdded = await ipfs.add(fileContent);
            console.log(fileAdded);
-           const fileHash = await fileAdded[0].hash;
-           console.log(`File uploaded to IPFS. CID: ${fileHash}`);
-           res.status(200).send({ CID: fileHash });
+           const CID = await fileAdded[0].hash;
+           console.log(`File uploaded to IPFS. CID: ${CID}`);
 
 
-           //let tx = '';
-           const link = 'http://localhost:5173/receive-file2?Cid='+fileHash+'&tx='+tx+'&uuid='+userinfos+'&fileName='+originalname;
+
+
+
+           const link = 'http://localhost:5173/receive-file2?Cid='+CID+'&tx='+tx+'&uuid='+senderUserId+'&fileName='+originalname;
            console.log(link);
 
 
@@ -320,33 +336,69 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
            var mailOptions = {
                from: 'bkl.abdel7@gmail.com',
-               to: email,
+               to: emailReceiver,
                subject: 'File uploaded to IPFS',
-               html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${fileHash}">Download File</a></p><p>Thank you for using our service!</p>`
+               html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${CID}">Download File</a></p><p>Thank you for using our service!</p>`
            };
 
 
 
-           /*
-           await transporter.sendMail(mailOptions, function(error, info){
-               if (error) {
-                   console.log("Erreur lors de l'envoi d'email");
-                   console.log(error.response);
-               } else {
-                   console.log('Email sent: ' + info.response);
-               }
-           });
 
 
-            */
+        let emailSucces = await transporter.sendMail(mailOptions).then(res => {
+            return true;
+        }).catch(err => {
+            return false;
+        });
+
+
+
+
+        // Stocker les informations dans Firebase:
+        const date = new Date();
+
+        const FileHistory =
+            {
+
+                senderEmail: emailReceiver,
+                receiverEmail: senderEmail,
+                transactionID: tx,
+                ipfsCID: CID,
+                nomFichier : originalname,
+                dateSent: date.toISOString(),
+                receiptAcknowledged: false,
+            };
+
+
+        await storeFileHistory(FileHistory);
+
+
+
+
+        res.status(200).send({
+            CID: CID,
+            tx : tx,
+            emailSucces : emailSucces,
+        });
+
 
        } catch (error) {
            console.log('Error uploading file to IPFS:', error);
-           res.status(500).send('Error uploading file to IPFS');
+           res.status(500).send('Erreur Envoie de fichier');
        }
 
-
 });
+
+const storeFileHistory = async (fileHistory) => {
+    try {
+        const fileHistoryRef = admin.firestore().collection('fileHistory');
+        const docRef = await fileHistoryRef.add(fileHistory);
+        console.log('Document written with ID:', docRef.id);
+    } catch (error) {
+        console.error('Error adding document:', error);
+    }
+};
+
 
 
 
@@ -486,6 +538,11 @@ function decryptFile(inputData, privateKey) {
 
 
 
+
+async function getTransactionDetails(tx){
+    const data = await API.txs(tx);
+    console.log(data);
+}
 
 async function getMetaDataFromTx(tx){
         const metadata = await API.txsMetadata(tx);
