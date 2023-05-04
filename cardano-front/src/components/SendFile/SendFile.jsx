@@ -22,7 +22,7 @@ import {
     FormHelperText,
     Alert,
     AlertIcon,
-    AlertTitle,
+    AlertTitle, VStack, Code, Link, HStack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -55,7 +55,12 @@ function SendFile({buildSendTransaction}) {
     const [passphraseError, setPassphraseError] = useState("");
     const [passphrase, setPassphrase] = useState("");
     const [link, setLink] = useState("");
-    const [showLink, setShowLink] = useState(false);
+    const [showLink, setShowLink] = useState(true);
+    const [linkTransaction, setLinkTransaction] = useState('');
+    const [isSentEmail, setIsSentEmail] = useState(false);
+
+
+
 
 
 // Dans la fonction handleSubmit
@@ -142,8 +147,9 @@ function SendFile({buildSendTransaction}) {
 
 
 
-        /*
+
         const user = auth.currentUser;
+        console.log(user);
         if (!user) {
             return;
         }
@@ -153,32 +159,53 @@ function SendFile({buildSendTransaction}) {
 
         // Créer une instance de FormData
         const formData = new FormData();
-        formData.append("email", email);
-        formData.append("destinateur", null);
+        formData.append("emailReceiver", email);
+        //formData.append("destinateur", null);
         formData.append("file", file);
         formData.append("passphrase", passphrase);
         formData.append("walletId", userData.walletId);
         formData.append("userId", user.uid);
+        formData.append("senderEmail", user.email);
+
 
 
         try {
             // Envoyer la requête POST avec l'instance de FormData
             const response = await axios.post("http://localhost:3002/send-file", formData);
+
+            if (response.status === 200) {
+                toast({
+                    title: "Réponse du serveur",
+                    description: "Transaction ID: " + response.data.tx,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+
+                console.log("Réponse du serveur :", response.data);
+                setLinkTransaction("https://preview.cardanoscan.io/transaction/"+response.data.tx);
+                setLink("https://ipfs.io/ipfs/" + response.data.CID + "?filename=" + response.data.CID);
+                console.log(response.data);
+                setIsSentEmail(response.data.emailSucces);
+                setShowLink(true);
+            } else {
+                toast({
+                    title: "Erreur du serveur",
+                    description: "Une erreur est survenue lors de l'envoi du fichier.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        } catch (error) {
             toast({
-                title: "Réponse du serveur",
-                description: "Transaction ID : " + response.data.txid,
-                status: "success",
+                title: "Erreur",
+                description: error.response.data.message,
+                status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-            console.log("Réponse du serveur :", response.data);
-            setLink("https://ipfs.io/ipfs/" + response.data.CID+'?filename='+response.data.CID);
-            setShowLink(true);
-        } catch (error) {
-            console.error(error);
         }
-
-         */
     };
 
 
@@ -255,24 +282,39 @@ function SendFile({buildSendTransaction}) {
                         transform="translate(-50%, -50%)"
                         zIndex={10}
                     >
-                    <Modal isOpen={showLink} onClose={() => setShowLink(false)}>
-                        <ModalOverlay />
-                        <ModalContent>
-                            <ModalHeader>Voici votre lien</ModalHeader>
-                            <ModalBody>
+                        <Modal isOpen={showLink} onClose={() => setShowLink(false)}>
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalHeader>Envoie Réussi</ModalHeader>
+                                <ModalBody>
 
-                                    <Text fontSize="lg">
-                                        Link:{" "}
-                                        <a href={link} target="_blank" rel="noopener noreferrer">
-                                            {link}
-                                        </a>
-                                    </Text>
+                                    <HStack >
+                                        <Text mx={3} fontSize={'lg'} as={'b'}> Transaction :</Text>
+                                        {linkTransaction && <Link href={linkTransaction} >Lien vers votre transaction </Link>}
+                                    </HStack>
+
+                                    <HStack >
+                                        <Text mx={3} fontSize={'lg'} as={'b'}> IPFS CID :</Text>
+                                        {link && <Link href={link} > Lien vers IPFS </Link>}
+                                    </HStack>
+
+                                    <HStack >
+                                        <Text mx={3} fontSize={'lg'} as={'b'}> Email envoyé :</Text>
+                                        {isSentEmail ? (
+                                            <Badge colorScheme={"green"}> True </Badge>
+                                        ) : (<Badge colorScheme={"red"}> False </Badge>)
+                                        }
+
+                                    </HStack>
+
+
                                     <Button mt={4} onClick={() => setShowLink(false)}>
                                         Fermer
                                     </Button>
-                            </ModalBody>
-                        </ModalContent>
-                    </Modal>
+                                </ModalBody>
+                            </ModalContent>
+                        </Modal>
+
                     </Box>
                 )}
 
