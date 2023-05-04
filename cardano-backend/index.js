@@ -54,20 +54,23 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
         let wallet = await walletServer.createOrRestoreShelleyWallet(name,mnemonic_sentence ,passphrase);
         //console.log(wallet);
         // Creation
+
         let rootKey = Seed.deriveRootKey(mnemonic);
         let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
         let accountKey = Seed.deriveAccountKey(rootKey, 0);
 
+
+
         const data = {
             walletId : wallet.id,
             walletName: wallet.name,
-            walletState:  wallet.state.status,
+            walletState:await  wallet.state.status,
             walletAvailableBalance: wallet.getAvailableBalance(),
             walletRewardBalance : wallet.getRewardBalance(),
             walletTotalBalance : wallet.getTotalBalance(),
             walletAddress:await wallet.getAddressAt(0),
-            privateKey:  privateKey.to_bech32(),
-            accountKey: accountKey.to_bech32(),
+            privateKey:  privateKey,
+            publicKey: accountKey,
         }
         return data;
 
@@ -84,6 +87,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             //console.log(wallet);
 
             // KEY HANDLING
+
             let rootKey = Seed.deriveRootKey(mnemonic);
             let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
             let accountKey = Seed.deriveAccountKey(rootKey, 0);
@@ -91,13 +95,13 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             const data = {
                 walletId : wallet.id,
                 walletName: wallet.name,
-                walletState: wallet.state.status,
+                walletState:await wallet.state.status,
                 walletAvailableBalance: wallet.getAvailableBalance(),
                 walletRewardBalance : wallet.getRewardBalance(),
                 walletTotalBalance : wallet.getTotalBalance(),
                 walletAddress: await wallet.getAddressAt(0),
-                privateKey: privateKey.to_bech32(),
-                accountKey: accountKey.to_bech32(),
+                privateKey: privateKey,
+                publicKey: accountKey,
             }
 
             //console.log(data.walletAddress);
@@ -105,13 +109,6 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
         }
         throw new Error();
     }
-
-
-
-
-
-
-
 
 }
 
@@ -236,9 +233,11 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     const email = req.body.email;
     const walletId = req.body.walletId;
     const walletPassphrase = req.body.passphrase;
+    const userinfos=req.body.userId;
     const file = req.file;
     const {originalname} = file;
     console.log(originalname);
+    console.log("userId : "+userinfos);
 
 
     // --------------------------- ETAPE 1 -------------------------------- //
@@ -252,7 +251,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     // --------------------------- ETAPE 2 -------------------------------- //
     // --------------------------- Crypter le document   -------------------------------- //
 
-    const dataUser = await getInfoDestinataireFromEmail(email).then(res => {
+    const dataUser = await getInfoDestinataireFromUUID(userinfos).then(res => {
         console.log('Information recupérées : (Public Key)');
         return  res;
     }).catch(err => {
@@ -260,7 +259,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     });
 
     const publicKeyRecv = dataUser.publicKey;
-    const userId = dataUser.uuid;
     const encryptedFilePath = encryptFile(file.path, publicKeyRecv);
     console.log(`Fichier chiffré : ${encryptedFilePath}`);
 
@@ -308,20 +306,20 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
            //let tx = '';
-           const link = 'http://localhost:5173/receive-file2?Cid='+fileHash+'&tx='+tx+'&uuid='+userId+'&fileName='+originalname;
+           const link = 'http://localhost:5173/receive-file2?Cid='+fileHash+'&tx='+tx+'&uuid='+userinfos+'&fileName='+originalname;
            console.log(link);
 
 
            var transporter = nodemailer.createTransport({
                service: 'gmail',
                auth: {
-                   user: 'lerbi1smartflow@gmail.com',
-                   pass: 'phfgkqtxbodurgld'
+                   user: 'bkl.abdel7@gmail.com',
+                   pass: 'pwsyqofnulgyztme'
                }
            });
 
            var mailOptions = {
-               from: 'lerbi1smartflow@gmail.com',
+               from: 'bkl.abdel7@gmail.com',
                to: email,
                subject: 'File uploaded to IPFS',
                html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${fileHash}">Download File</a></p><p>Thank you for using our service!</p>`
@@ -407,8 +405,35 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
     // Comparer les Hashs
     if (compareHashes(hashFromBlockChain, hashFileFromIPFS)){
+       // Enregistrer les clés dans Firestore
+        const usersRef = admin.firestore().collection('users');
 
-        // TODO : envoie l'accusée de reception
+        // Créer un document pour l'utilisateur avec l'ID correspondant
+        const userDocRef = usersRef.doc(uuid);
+        const userDocSnapshot = await userDocRef.get();
+
+        const userEmail = userDocSnapshot.data().email;
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'bkl.abdel7@gmail.com',
+                pass: 'pwsyqofnulgyztme'
+            }
+        });
+        var mailOptions = {
+            from: 'bkl.abdel7@gmail.com',
+            to: userEmail,
+            subject: 'File uploaded to IPFS',
+            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p>`
+        };
+
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
 
         res.status(200).send({
             compare: true ,
