@@ -1,7 +1,22 @@
 import { useState } from "react";
-import {Box, Button, FormControl, FormLabel, Input, Alert, AlertIcon, useToast} from "@chakra-ui/react";
+import {
+    Text,
+    Flex,
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    Alert,
+    AlertIcon,
+    useToast,
+    HStack,
+    useColorModeValue,
+    InputGroup, InputRightElement, Heading, Stack, Link,
+} from "@chakra-ui/react";
 import AuthenticationService from "../services/AuthenticationService.js";
 // import { auth } from "../firebase";
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 const RegistrationForm = () => {
     const [firstName, setFirstName] = useState("");
@@ -13,7 +28,23 @@ const RegistrationForm = () => {
     const [isError, setIsError] = useState(false);
     const toast = useToast();
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
+    const handleAgeValidation = () => {
+        const today = new Date();
+        const birthDate = new Date(birthdate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+            age-=1;
+        }
+        if (age < 18) {
+            setError('You must be at least 18 years old to register.');
+            return false;
+        }
+        return true;
+    }
     const handlePasswordValidation = () => {
         if (password.length < 8) {
             setError('Password must be at least 8 characters long');
@@ -27,7 +58,7 @@ const RegistrationForm = () => {
     }
     const handleRegister = async (event) => {
         event.preventDefault();
-        if (handlePasswordValidation()) {
+        if (handlePasswordValidation()&&handleAgeValidation()) {
             try {
                 await AuthenticationService.register(email, password, firstName, lastName, birthdate);
                 console.log('Utilisateur inscrit');
@@ -46,7 +77,7 @@ const RegistrationForm = () => {
                 setIsSuccess(false);
                 setIsError(true);
             }
-        }else{
+        }else if(!handlePasswordValidation()){
             setIsError(true);
             toast({
                 title: "Error",
@@ -55,24 +86,55 @@ const RegistrationForm = () => {
                 duration: 9000,
                 isClosable: true,
             });
+        }else{
+            setIsError(true);
+            toast({
+                title: "Error",
+                description: "You must be at least 18 years old to register.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         }
+
     };
 
     return (
+        <Flex
+            minH={'fit-content'}
+            width={'3xl'}
+            align={'center'}
+            justify={'center'}
+            bg={useColorModeValue('gray.50', 'gray.800')}>
         <Box>
+            <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
+                <Stack align={'center'}>
+                    <Heading fontSize={'4xl'} textAlign={'center'}>
+                        Sign up
+                    </Heading>
+                    <Text fontSize={'lg'} color={'gray.600'}>
+                        to enjoy all of our cool features ✌️
+                    </Text>
+                </Stack>
+                <Box
+                    rounded={'lg'}
+                    bg={useColorModeValue('white', 'gray.700')}
+                    boxShadow={'lg'}
+                    p={8}>
             {isSuccess && (
                 <Alert status="success" mb={4}>
                     <AlertIcon />
                     Inscription réussie !
                 </Alert>
             )}
+
             {isError && (
                 <Alert status="error" mb={4}>
                     <AlertIcon />
                     Une erreur est survenue, veuillez réessayer.
                 </Alert>
             )}
-
+<HStack>
             <FormControl id="firstName" isRequired>
                 <FormLabel>First Name</FormLabel>
                 <Input
@@ -92,7 +154,7 @@ const RegistrationForm = () => {
                     onChange={(event) => setLastName(event.target.value)}
                 />
             </FormControl>
-
+</HStack>
             <FormControl id="birthdate" isRequired>
                 <FormLabel>Date of Birth</FormLabel>
                 <Input
@@ -115,17 +177,41 @@ const RegistrationForm = () => {
 
             <FormControl id="password" isRequired>
                 <FormLabel>Password</FormLabel>
-                <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                />
+                <InputGroup>
+                    <Input type={showPassword ? 'text' : 'password'}
+                           placeholder="Enter your password"
+                           value={password}
+                           onChange={(event) => setPassword(event.target.value)}
+                    />
+                    <InputRightElement h={'full'}>
+                        <Button
+                            variant={'ghost'}
+                            onClick={() =>
+                                setShowPassword((showPassword) => !showPassword)
+                            }>
+                            {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                        </Button>
+                    </InputRightElement>
+                </InputGroup>
             </FormControl>
-            <Button mt={4} w={"full"} colorScheme="teal" onClick={handleRegister}>
+            <Button mt={4} w={"full"}
+                    bg={'blue.400'}
+                    color={'white'}
+                    _hover={{
+                        bg: 'blue.500',
+                    }} onClick={handleRegister}>
                 Register
             </Button>
+                    <Text fontSize={'lg'} color={'gray.600'} mt={8}>
+                        Vous avez dejà un compte ?
+                        <Link ml={4} color='teal.500' href='/'>
+                            Connexion
+                        </Link>
+                    </Text>
+                </Box>
+            </Stack>
         </Box>
+        </Flex>
     );
 };
 
