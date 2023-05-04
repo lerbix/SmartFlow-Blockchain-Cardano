@@ -100,22 +100,6 @@ const RegistrationForm = () => {
     };
 
     return (
-        <Flex
-            minH={'fit-content'}
-            width={'3xl'}
-            align={'center'}
-            justify={'center'}
-            bg={useColorModeValue('gray.50', 'gray.800')}>
-        <Box>
-            <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-                <Stack align={'center'}>
-                    <Heading fontSize={'4xl'} textAlign={'center'}>
-                        Sign up
-                    </Heading>
-                    <Text fontSize={'lg'} color={'gray.600'}>
-                        to enjoy all of our cool features ✌️
-                    </Text>
-                </Stack>
                 <Box
                     rounded={'lg'}
                     bg={useColorModeValue('white', 'gray.700')}
@@ -209,9 +193,7 @@ const RegistrationForm = () => {
                         </Link>
                     </Text>
                 </Box>
-            </Stack>
-        </Box>
-        </Flex>
+
     );
 };
 
