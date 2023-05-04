@@ -13,7 +13,16 @@ import {
     AlertDialogContent,
     AlertDialogHeader,
     AlertDialogBody,
-    AlertDialogFooter, ModalContent, ModalBody, Modal, ModalOverlay, ModalHeader,
+    AlertDialogFooter,
+    ModalContent,
+    ModalBody,
+    Modal,
+    ModalOverlay,
+    ModalHeader,
+    FormHelperText,
+    Alert,
+    AlertIcon,
+    AlertTitle,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -43,6 +52,7 @@ function SendFile({buildSendTransaction}) {
     const [emailError, setEmailError] = useState("");
     const [fileError, setFileError] = useState("");
     const [formError, setFormError] = useState("");
+    const [passphraseError, setPassphraseError] = useState("");
     const [passphrase, setPassphrase] = useState("");
     const [link, setLink] = useState("");
     const [showLink, setShowLink] = useState(false);
@@ -51,35 +61,88 @@ function SendFile({buildSendTransaction}) {
 // Dans la fonction handleSubmit
     const toast = useToast();
     const handleEmailChange = (event) => {
-        setEmail(event.target.value);
+        const email = event.target.value;
+        setEmail(email);
         setEmailError("");
         setFormError("");
+
+        // Vérification de l'email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            setEmailError("Email est requis");
+        } else if (!emailRegex.test(email)) {
+            setEmailError("Entrez un email valide !");
+        }
     };
 
     const handleFileChange = (event) => {
-        setFile(event.target.files[0]);
+        const file = event.target.files[0];
+        setFile(file);
         setFileError("");
         setFormError("");
+
+        // Vérification de la taille du fichier
+        const maxSize = 2 * 1024 * 1024; // 2 Mo
+        if (!file) {
+            setFileError("Le fichier est requis !");
+        } else if (file.size > maxSize) {
+            setFileError("La taille du fichier ne doit pas dépasser 2 Mo");
+        }
     };
+
+    const handlePassphraseChange = (event) => {
+        const passphrase = event.target.value;
+        setPassphrase(passphrase);
+        setPassphraseError("");
+        setFormError("");
+
+        // Validation de la phrase secrète
+        if (!passphrase) {
+            setPassphraseError("La phrase secrète est requise !");
+        } else if (passphrase.length < 6) {
+            setPassphraseError("La phrase secrète doit contenir au moins 6 caractères !");
+        } else {
+            setPassphraseError("");
+        }
+    };
+
 
 
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+
         if (!email) {
-            setEmailError("Veuillez fournir une adresse e-mail.");
+            setEmailError("Email est requis !");
+            setFormError('Veuillez vérifier vos informations !');
             return;
         }
 
         if (!file) {
-            setFileError("Veuillez sélectionner un fichier à envoyer.");
+            setFileError("Le fichier est requis !");
+            setFormError('Veuillez vérifier vos informations !');
+            return;
+        }
+
+        if (!passphrase) {
+            setPassphraseError("La passPhrase est requise !");
+            setFormError('Veuillez vérifier vos informations !');
             return;
         }
 
 
+        if (emailError || fileError || passphraseError ){
+            setFormError('Veuillez vérifier vos informations !');
+            return;
+        }
+
+        console.log("submitted !");
 
 
+
+
+        /*
         const user = auth.currentUser;
         if (!user) {
             return;
@@ -95,7 +158,7 @@ function SendFile({buildSendTransaction}) {
         formData.append("file", file);
         formData.append("passphrase", passphrase);
         formData.append("walletId", userData.walletId);
-        formData.append("userId",user.uid)
+        formData.append("userId", user.uid);
 
 
         try {
@@ -114,43 +177,76 @@ function SendFile({buildSendTransaction}) {
         } catch (error) {
             console.error(error);
         }
+
+         */
     };
 
 
     return (
         <Box maxW="xl" mx="auto" p={4}>
-            <form onSubmit={handleSubmit}>
+            <form noValidate onSubmit={handleSubmit}>
+
+                {formError && (
+                    <Alert py={4} status="error">
+                        <AlertIcon />
+                        <AlertTitle>{formError}</AlertTitle>
+                    </Alert>
+
+                )}
+
                 <FormControl id="email" isRequired isInvalid={emailError}>
                     <FormLabel>Adresse e-mail</FormLabel>
-                    <Input type="email" value={email} onChange={handleEmailChange} />
-                    {emailError && <FormErrorMessage>{emailError}</FormErrorMessage>}
+                    <Input  type="email" value={email} onChange={handleEmailChange} />
+                    {!emailError ? (
+                        <FormHelperText>
+                            L'email du destinataire
+                        </FormHelperText>
+                    ) : (
+                        <FormErrorMessage>{emailError}</FormErrorMessage>
+                    )}
                 </FormControl>
+
                 <FormControl id="file" isRequired isInvalid={fileError}>
                     <FormLabel>Fichier à envoyer</FormLabel>
                     <Input type="file" onChange={handleFileChange} />
-                    {fileError && <FormErrorMessage>{fileError}</FormErrorMessage>}
+                    {!fileError ? (
+                        <FormHelperText>
+                            Le fichier à envoyer : taille maximale 2 Mo
+                        </FormHelperText>
+                    ) : (
+                        <FormErrorMessage>{fileError}</FormErrorMessage>
+                    )}
                 </FormControl>
 
-                <FormControl id="passphrase">
+
+                <FormControl id="passphrase" isRequired isInvalid={passphraseError}>
                     <FormLabel>Phrase secrète</FormLabel>
                     <Input
                         type="password"
                         value={passphrase}
-                        onChange={(e) => setPassphrase(e.target.value)}
+                        onChange={handlePassphraseChange}
                         placeholder="Entrez votre phrase secrète"
                     />
-                    <Text fontSize="sm">
-                        La phrase secrète est utilisée pour protéger votre portefeuille en
-                        ajoutant une couche de sécurité supplémentaire.
-                    </Text>
+                    {!passphraseError ? (
+                        <FormHelperText>
+                            La phrase secrète est utilisée pour protéger votre portefeuille en
+                            ajoutant une couche de sécurité supplémentaire.
+                        </FormHelperText>
+                    ) : (
+                        <FormErrorMessage>{passphraseError}</FormErrorMessage>
+                    )}
+
                 </FormControl>
-                {formError && <Box color="red.500">{formError}</Box>}
-                <Button type="submit" mt={4}>
+
+
+
+                <Button width={"full"} colorScheme={"green"} type="submit" mt={4}>
                     Envoyer
                 </Button>
                 <Button  mt={4} ml={4} colorScheme="gray" onClick={()=> window.location.href ="/dashboard"}>
                     retour
                 </Button>
+
                 {showLink && (
                     <Box
                         position="fixed"
