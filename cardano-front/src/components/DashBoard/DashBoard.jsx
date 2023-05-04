@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -100,6 +100,10 @@ const Dashboard = () => {
                             )}
                             <Button my={3} onClick={()=>window.location.href = "/walletCli"}>
                                 Connect With Cardano Wallet CLI
+                            </Button>
+
+                            <Button  my={3} onClick={()=>window.location.href = "/history"}>
+                                Historique des fichiers Envoyés
                             </Button>
                         </Box>
                     </Card>
