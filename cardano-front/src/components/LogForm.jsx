@@ -14,12 +14,13 @@ import {
     useColorModeValue,
     Alert,
     AlertIcon,
-    Image,
+    Image, InputRightElement, InputGroup,
 } from '@chakra-ui/react';
 import AuthenticationService from "../services/AuthenticationService.js";
 import { initializeApp } from "firebase/app";
 import firebaseConfig from "../utils/firebaseConfig.js";
 import { getAuth} from "firebase/auth";
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -29,6 +30,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
 
     useEffect(() => {
@@ -83,11 +85,22 @@ const LoginForm = () => {
                         </FormControl>
                         <FormControl id="password" isRequired mt="4">
                             <FormLabel>Password</FormLabel>
+                            <InputGroup>
                             <Input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 value={rememberMe && !password ? '' : password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
+                                <InputRightElement h={'full'}>
+                                    <Button
+                                        variant={'ghost'}
+                                        onClick={() =>
+                                            setShowPassword((showPassword) => !showPassword)
+                                        }>
+                                        {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                                    </Button>
+                                </InputRightElement>
+                            </InputGroup>
                         </FormControl>
                         <Stack  direction={{ base: 'column', sm: 'row' }}
                                 align={'start'}
