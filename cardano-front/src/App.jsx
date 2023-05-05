@@ -14,7 +14,8 @@ import FileReceiver from "./components/SendFile/ReceiveFile.jsx";
 import SendFileForm from "./components/SendFileWallet/SendFileForm.jsx";
 import SendFileDapp from "./components/SendFileWallet/SendFile.jsx";
 import SendFilePage from "./pages/SendFilePage.jsx";
-import History from "./pages/History.jsx";
+import HistorySent from "./pages/HistorySent.jsx";
+import HistoryReceived from "./pages/HistoryReceived.jsx";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -31,7 +32,8 @@ function App() {
                   <Route path={'/send-file'} element={<SendFilePage/>} />
                   <Route path={'/receive-file2'} element={<FileReceiver/>} />
                   <Route path={"/walletCli"} element={<WalletConnectorCli/>} />
-                  <Route path={"/history"} element={<History/>} />
+                  <Route path={"/historySent"} element={<HistorySent/>} />
+                  <Route path={"/historyReceived"} element={<HistoryReceived/>} />
               </Routes>
           </Router>
       </ChakraProvider>
