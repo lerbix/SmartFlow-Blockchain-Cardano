@@ -14,9 +14,17 @@ import {
     useColorModeValue,
     InputGroup, InputRightElement, Heading, Stack, Link,
 } from "@chakra-ui/react";
+import {initializeApp} from "firebase/app";
 import AuthenticationService from "../services/AuthenticationService.js";
 // import { auth } from "../firebase";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import {getAuth} from "firebase/auth";
+import firebaseConfig from "../utils/firebaseConfig.js";
+
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
 
 const RegistrationForm = () => {
     const [firstName, setFirstName] = useState("");
@@ -35,7 +43,6 @@ const RegistrationForm = () => {
         const birthDate = new Date(birthdate);
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
-
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
             age-=1;
         }
@@ -45,6 +52,25 @@ const RegistrationForm = () => {
         }
         return true;
     }
+    const birthdateString = birthdate.toString().slice(0, 10); // convert birthdate to string in YYYY-MM-DD format
+    const validateFields = (firstName, lastName, address, email, password, birthdate) => {
+        const fields = [
+            { value: firstName, name: "First Name" },
+            { value: lastName, name: "Last Name" },
+            { value: birthdateString , name: "Birthdate" },
+            { value: email, name: "Email Address" },
+            { value: password, name: "Password" },
+        ];
+
+        for (let i = 0; i < fields.length; i++) {
+            const field = fields[i];
+            if (!field.value) {
+                return `${field.name} is required`;
+            }
+        }
+
+        return null;
+    };
     const handlePasswordValidation = () => {
         if (password.length < 8) {
             setError('Password must be at least 8 characters long');
@@ -58,6 +84,19 @@ const RegistrationForm = () => {
     }
     const handleRegister = async (event) => {
         event.preventDefault();
+        const errorMessage = validateFields(firstName, lastName,birthdate, email, password);
+        if (errorMessage) {
+            setIsError(true);
+            toast({
+                title: "Error",
+                description: errorMessage,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+            return;
+        }
+
         if (handlePasswordValidation()&&handleAgeValidation()) {
             try {
                 await AuthenticationService.register(email, password, firstName, lastName, birthdate);
