@@ -52,9 +52,6 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
     try{
         let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
         let wallet = await walletServer.createOrRestoreShelleyWallet(name,mnemonic_sentence ,passphrase);
-        //console.log(wallet);
-        // Creation
-
         let rootKey = Seed.deriveRootKey(mnemonic);
         let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
         let accountKey = Seed.deriveAccountKey(rootKey, 0);
@@ -72,6 +69,8 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             privateKey:  privateKey,
             publicKey: accountKey,
         }
+
+        console.log(data);
         return data;
 
 
@@ -100,11 +99,13 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
                 walletRewardBalance : wallet.getRewardBalance(),
                 walletTotalBalance : wallet.getTotalBalance(),
                 walletAddress: await wallet.getAddressAt(0),
-                privateKey: privateKey,
-                publicKey: accountKey,
+                privateKey: privateKey.to_bech32(),
+                publicKey: accountKey.to_bech32(),
             }
 
-            //console.log(data.walletAddress);
+            console.log("deja : ");
+            console.log(data);
+
             return data;
         }
         throw new Error();
@@ -238,13 +239,12 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
 
-
     const file = req.file;
     const {originalname} = file;
     console.log("userId : "+senderUserId);
 
     let isHashSucces = false;
-    let isCryptSucces = false;
+    //let isCryptSucces = false;
 
 
     // --------------------------- ETAPE 1 -------------------------------- //
@@ -300,6 +300,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         return result.id;
     }).catch(e => {
         console.log('Erreur lors de Envoie à la blockChain');
+        throw new Error("Erreur lors de l'envoie à la blockChain");
     });
 
 
@@ -383,8 +384,8 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
        } catch (error) {
-           console.log('Error uploading file to IPFS:', error);
-           res.status(500).send('Erreur Envoie de fichier');
+        console.log('Envoie du fichier échoué')
+        res.status(500).send({message: error.message});
        }
 
 });
@@ -486,6 +487,14 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
                 console.log('Email sent: ' + info.response);
             }
         });
+
+
+
+
+        // Accusé de reception :
+        await setAccuseTrue(tx);
+
+
 
         res.status(200).send({
             compare: true ,
@@ -607,6 +616,23 @@ async function  hashFromFile(file) {
     });
     const hashFile = calculatedHash;
    return hashFile;
+}
+
+
+async function setAccuseTrue(transactionID) {
+    const fileHistoryRef = admin.firestore().collection('fileHistory');
+
+    const querySnapshot = await fileHistoryRef.where('transactionID', '==', transactionID).get();
+
+    if (!querySnapshot.empty) {
+        querySnapshot.forEach(async (doc) => {
+            await doc.ref.update({ receiptAcknowledged: true });
+        });
+
+        console.log("Champ receiptAcknowledged mis à jour avec succès pour les documents correspondants !");
+    } else {
+        console.log("Aucun document trouvé avec l'ID de transaction spécifié.");
+    }
 }
 
 
