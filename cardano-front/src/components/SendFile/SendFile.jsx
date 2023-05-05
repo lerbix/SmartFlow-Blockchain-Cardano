@@ -22,7 +22,7 @@ import {
     FormHelperText,
     Alert,
     AlertIcon,
-    AlertTitle, VStack, Code, Link, HStack,
+    AlertTitle, VStack, Code, Link, HStack,Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -58,6 +58,7 @@ function SendFile({buildSendTransaction}) {
     const [showLink, setShowLink] = useState(false);
     const [linkTransaction, setLinkTransaction] = useState('');
     const [isSentEmail, setIsSentEmail] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // new state variable
 
 
 
@@ -116,7 +117,7 @@ function SendFile({buildSendTransaction}) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
+        setIsLoading(true);
 
         if (!email) {
             setEmailError("Email est requis !");
@@ -188,6 +189,7 @@ function SendFile({buildSendTransaction}) {
                 console.log(response.data);
                 setIsSentEmail(response.data.emailSucces);
                 setShowLink(true);
+                setIsLoading(false);
             } else {
                 toast({
                     title: "Erreur du serveur",
@@ -205,6 +207,7 @@ function SendFile({buildSendTransaction}) {
                 duration: 5000,
                 isClosable: true,
             });
+            setIsLoading(false);
         }
     };
 
@@ -268,7 +271,11 @@ function SendFile({buildSendTransaction}) {
 
 
                 <Button width={"full"} colorScheme={"green"} type="submit" mt={4}>
-                    Envoyer
+                    {isLoading ? (
+                        <Spinner size="sm" mr="2" />
+                    ) : (
+                        "Envoyer"
+                    )}
                 </Button>
                 <Button  mt={4} ml={4} colorScheme="gray" onClick={()=> window.location.href ="/dashboard"}>
                     retour
