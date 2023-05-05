@@ -14,8 +14,8 @@ import {
 import {initializeApp} from "firebase/app";
 import firebaseConfig from "../../utils/firebaseConfig.js";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
-import {getFirestore} from "firebase/firestore";
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import {doc,getFirestore} from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 
 
 // Initialize Firebase
@@ -67,7 +67,11 @@ const FileReceivedHistory = () => {
         return () => unsubscribe();
     }, []);
 
-
+    const handleDelete = async (id) => {
+        const fileHistoryRef = collection(db, 'fileHistory');
+        await deleteDoc(doc(fileHistoryRef, id));
+        setData(data.filter((entry) => entry.id !== id));
+    };
     function Pagination({ currentPage, totalPages, onChangePage }) {
         const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
@@ -111,6 +115,7 @@ const FileReceivedHistory = () => {
                         <Th>IPFS CID</Th>
                         <Th>Date et heure d'envoi</Th>
                         <Th>Download</Th>
+                        <Th>Supprimer</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -133,6 +138,11 @@ const FileReceivedHistory = () => {
                                 <Link href={"http://localhost:5173/receive-file2?Cid="+entry.ipfsCID+"&tx="+entry.transactionID+"&uuid="+userId+"&fileName="+entry.nomFichier} isExternal>
                                     <Button colorScheme="green" >Download</Button>
                                 </Link>
+                            </Td>
+                            <Td>
+                                <Button colorScheme="red" onClick={() => handleDelete(entry.id)}>
+                                    Supprimer
+                                </Button>
                             </Td>
                         </Tr>
                     ))}
