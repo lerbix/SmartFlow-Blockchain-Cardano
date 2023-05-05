@@ -8,7 +8,7 @@ import {
     Text,
     Heading,
     Divider,
-    useToast, Box, Table, Tbody, Tr, Td, HStack, Badge, Code, VStack,
+    useToast, Box, Table, Tbody, Tr, Td, HStack, Badge, Code, VStack, Card,
 } from "@chakra-ui/react";
 import axios from 'axios';
 import {initializeApp} from "firebase/app";
@@ -96,10 +96,10 @@ const WalletConnectorCli = () => {
 
     return (
         <Stack spacing={8} mx="auto" mt={8} maxW="lg" py={12} px={6}>
+
             <Heading textAlign="center">Connectez ou créez votre portefeuille</Heading>
             <Divider />
             <Stack spacing={6}>
-
                 <FormControl id="name">
                     <FormLabel>Nom du portefeuille</FormLabel>
                     <Input
@@ -182,7 +182,7 @@ const WalletConnectorCli = () => {
                             </Box>
                             <Box>
                                 <Text fontWeight="bold">Account Key  :</Text>
-                                <Text >{walletData.accountKey}</Text>
+                                <Text >{walletData.publicKey}</Text>
                             </Box>
 
                         </Stack>
