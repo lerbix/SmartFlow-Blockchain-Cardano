@@ -1,7 +1,8 @@
 import {useParams, useSearchParams} from "react-router-dom";
-import {Box, Button, Center, Heading, Link, Text, useToast} from "@chakra-ui/react";
+import {Box, Button, Center, Spinner, Heading, Link, Text, useToast} from "@chakra-ui/react";
 import axios from "axios";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
+
 
 const FileReceiver = () => {
 
@@ -16,8 +17,7 @@ const FileReceiver = () => {
     const [downloadLink, setDownloadLink] = useState('');
     const hiddenDownloadLink = useRef(null);
     const toast = useToast();
-
-
+    const [isLoading, setIsLoading] = useState(false);
     // Add a useEffect hook to watch for downloadLink changes
     useEffect(() => {
         // Trigger a click event on the hidden anchor tag only if the download link is set
@@ -30,8 +30,9 @@ const FileReceiver = () => {
 
     console.log(cid);
     console.log(tx);
-    const handleFileReceive = () => {
 
+    const handleFileReceive = () => {
+        setIsLoading(true);
         axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid, originaName,})
             .then(response => {
                 setDownloadLink(`http://localhost:3002/download/${response.data.fileName}`);
@@ -48,6 +49,7 @@ const FileReceiver = () => {
                         duration: 3000,
                         isClosable: true,
                     })
+                    setIsLoading(false);
                 }else {
                     toast({
                         title: response.data.message,
@@ -61,6 +63,7 @@ const FileReceiver = () => {
 
             })
             .catch(error => {
+                setIsLoading(false);
                 // Gestion des erreurs ici
                 console.log(error.response);
             });
@@ -90,7 +93,11 @@ const FileReceiver = () => {
 
             <Center>
                 <Button onClick={handleFileReceive} colorScheme="blue">
-                    Recevoir un fichier
+                    {isLoading ? (
+                        <Spinner size="sm" mr="2" />
+                    ) : (
+                    "Recevoir un fichier"
+                        )}
                 </Button>
             </Center>
         </Box>
