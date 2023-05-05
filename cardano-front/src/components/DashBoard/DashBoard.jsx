@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc} from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
 import {Badge, Box, Button, Card, Container, Heading, Spinner} from "@chakra-ui/react";
 import AuthenticationService from "../../services/AuthenticationService.js";
@@ -62,7 +62,18 @@ const Dashboard = () => {
         }
     };
 
-
+    const handleDisconnect = async () => {
+        try {
+            const userDocRef = doc(db, "users", user.uid);
+            await updateDoc(userDocRef, {
+                walletAddress: null,
+                walletId: null,
+            });
+            setIsWalletConnected(false);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
 
 
@@ -98,10 +109,16 @@ const Dashboard = () => {
                             {isWalletConnected && (
                                 <Button colorScheme="blue" mt={4} ml={4} onClick={() => window.location.href = "/send-file"} >Send</Button>
                             )}
+                            {!isWalletConnected && (
                             <Button my={3} onClick={()=>window.location.href = "/walletCli"}>
                                 Connect With Cardano Wallet CLI
                             </Button>
-
+                                )}
+                            {isWalletConnected && (
+                                <Button my={3} onClick={handleDisconnect}>
+                                    Disconnect Your Cardano Wallet CLI
+                                </Button>
+                            )}
                             <Button  my={3} onClick={()=>window.location.href = "/historySent"}>
                                 Historique des fichiers Envoyés
                             </Button>
