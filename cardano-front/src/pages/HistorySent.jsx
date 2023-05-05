@@ -2,7 +2,7 @@ import React from 'react';
 import {Box, ChakraProvider, Container} from '@chakra-ui/react';
 import FileSentHistory from "../components/Historique/FileSentHistory.jsx";
 
-const History = () => {
+const HistorySent = () => {
     const sampleData = [
         {
             senderEmail: 'expediteur@example.com',
@@ -37,4 +37,4 @@ const History = () => {
     );
 };
 
-export default History;
+export default HistorySent;
