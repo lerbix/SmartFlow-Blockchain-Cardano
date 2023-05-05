@@ -102,8 +102,11 @@ const Dashboard = () => {
                                 Connect With Cardano Wallet CLI
                             </Button>
 
-                            <Button  my={3} onClick={()=>window.location.href = "/history"}>
+                            <Button  my={3} onClick={()=>window.location.href = "/historySent"}>
                                 Historique des fichiers Envoyés
+                            </Button>
+                            <Button  my={3} onClick={()=>window.location.href = "/historyReceived"}>
+                                Historique des fichiers Recus
                             </Button>
                         </Box>
                     </Card>
