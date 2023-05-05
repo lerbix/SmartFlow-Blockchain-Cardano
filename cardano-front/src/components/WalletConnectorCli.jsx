@@ -76,16 +76,14 @@ const WalletConnectorCli = () => {
                 walletId: walletData.walletId,
                 walletAddress: walletData.walletAddress.id,
                 //publicKey: walletData.publicKey,
-            }).then(res => {
-                toast({
-                    title: "Liées avec succes",
-                    description: 'Les informations sont maintenant liées à votre compte.' ,
-                    status: "success",
-                    duration: 5000,
-                    isClosable: true,
-                });
             });
-
+            toast({
+                title: "Wallet is linked successfully.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            console.log("user modified ! ");
         } catch (error) {
             console.log(error);
         }
