@@ -22,7 +22,7 @@ import {
     FormHelperText,
     Alert,
     AlertIcon,
-    AlertTitle, VStack, Code, Link, HStack,Spinner,
+    AlertTitle, VStack, Code, Link, HStack, Spinner, Tooltip,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -184,8 +184,8 @@ function SendFile({buildSendTransaction}) {
                 });
 
                 console.log("Réponse du serveur :", response.data);
-                setLinkTransaction("https://preview.cardanoscan.io/transaction/"+response.data.tx);
-                setLink("https://ipfs.io/ipfs/" + response.data.CID + "?filename=" + response.data.CID);
+                setLinkTransaction(response.data.tx);
+                setLink(response.data.CID);
                 console.log(response.data);
                 setIsSentEmail(response.data.emailSucces);
                 setShowLink(true);
@@ -297,27 +297,50 @@ function SendFile({buildSendTransaction}) {
 
                                     <HStack >
                                         <Text mx={3} fontSize={'lg'} as={'b'}> Transaction :</Text>
-                                        {linkTransaction && <Link href={linkTransaction} >Lien vers votre transaction </Link>}
+
+                                        {linkTransaction ?
+                                            <Tooltip label={linkTransaction}>
+                                                <Badge colorScheme={'green'}> Envoyé</Badge>
+                                            </Tooltip> :
+                                            (<Tooltip label={'Transaction échoué'}>
+                                                <Badge colorScheme={'red'}> Non Envoyé</Badge>
+                                            </Tooltip> )
+                                        }
                                     </HStack>
 
                                     <HStack >
                                         <Text mx={3} fontSize={'lg'} as={'b'}> IPFS CID :</Text>
-                                        {link && <Link href={link} > Lien vers IPFS </Link>}
+                                        {link ?
+                                            <Tooltip label={link}>
+                                                <Badge colorScheme={'green'}> Envoyé</Badge>
+                                            </Tooltip> :
+                                            (<Tooltip label={'Transaction échoué'}>
+                                                <Badge colorScheme={'red'}> Non Envoyé</Badge>
+                                            </Tooltip> )
+                                        }
                                     </HStack>
 
                                     <HStack >
                                         <Text mx={3} fontSize={'lg'} as={'b'}> Email envoyé :</Text>
                                         {isSentEmail ? (
-                                            <Badge colorScheme={"green"}> True </Badge>
-                                        ) : (<Badge colorScheme={"red"}> False </Badge>)
+                                            <Badge colorScheme={"green"}> Envoyé </Badge>
+                                        ) : (<Badge colorScheme={"red"}> Non Envoyé </Badge>)
                                         }
 
                                     </HStack>
 
 
-                                    <Button mt={4} onClick={() => setShowLink(false)}>
-                                        Fermer
-                                    </Button>
+                                    <HStack mt={4} spacing={4}  justifyContent={"center"} >
+                                        <Button  onClick={() => setShowLink(false)}>
+                                            Fermer
+                                        </Button>
+                                        <Button colorScheme={"yellow"} onClick={() => window.location.href = "/historySent"}>
+                                            Consulter vos historique
+                                        </Button>
+
+
+                                    </HStack>
+
                                 </ModalBody>
                             </ModalContent>
                         </Modal>
