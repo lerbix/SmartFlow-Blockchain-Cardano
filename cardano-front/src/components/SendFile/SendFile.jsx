@@ -55,7 +55,7 @@ function SendFile({buildSendTransaction}) {
     const [passphraseError, setPassphraseError] = useState("");
     const [passphrase, setPassphrase] = useState("");
     const [link, setLink] = useState("");
-    const [showLink, setShowLink] = useState(true);
+    const [showLink, setShowLink] = useState(false);
     const [linkTransaction, setLinkTransaction] = useState('');
     const [isSentEmail, setIsSentEmail] = useState(false);
 
