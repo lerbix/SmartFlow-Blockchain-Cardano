@@ -16,6 +16,7 @@ import SendFileDapp from "./components/SendFileWallet/SendFile.jsx";
 import SendFilePage from "./pages/SendFilePage.jsx";
 import HistorySent from "./pages/HistorySent.jsx";
 import HistoryReceived from "./pages/HistoryReceived.jsx";
+import AuthWrapper from "./components/AuthWrapper.jsx";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -27,13 +28,13 @@ function App() {
                   <Route path="/forget-password" element={<ForgetPassword />} />
                   <Route path="/" element={<LogInPage />} />
                   <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/edit-profile" element={<EditProfil />} />
-                  <Route path={'/send-file'} element={<SendFilePage/>} />
-                  <Route path={'/receive-file2'} element={<FileReceiver/>} />
-                  <Route path={"/walletCli"} element={<WalletConnectorCli/>} />
-                  <Route path={"/historySent"} element={<HistorySent/>} />
-                  <Route path={"/historyReceived"} element={<HistoryReceived/>} />
+                  <Route path="/dashboard" element={ <AuthWrapper> <Dashboard/> </AuthWrapper>} />
+                  <Route path="/edit-profile" element={<AuthWrapper> <EditProfil/> </AuthWrapper> } />
+                  <Route path={'/send-file'} element={<AuthWrapper> <SendFilePage/> </AuthWrapper>} />
+                  <Route path={'/receive-file2'} element={<AuthWrapper> <FileReceiver/> </AuthWrapper>} />
+                  <Route path={"/walletCli"} element={<AuthWrapper> <WalletConnectorCli/> </AuthWrapper>} />
+                  <Route path={"/historySent"} element={<AuthWrapper> <HistorySent/> </AuthWrapper>} />
+                  <Route path={"/historyReceived"} element={<AuthWrapper> <HistoryReceived/> </AuthWrapper>} />
               </Routes>
           </Router>
       </ChakraProvider>

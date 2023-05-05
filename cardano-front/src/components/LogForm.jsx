@@ -21,6 +21,7 @@ import { initializeApp } from "firebase/app";
 import firebaseConfig from "../utils/firebaseConfig.js";
 import { getAuth} from "firebase/auth";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import {useLocation, useNavigate} from "react-router-dom";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -31,6 +32,9 @@ const LoginForm = () => {
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+
 
 
     useEffect(() => {
@@ -55,12 +59,17 @@ const LoginForm = () => {
                 localStorage.removeItem('password');
             }
             await AuthenticationService.login(email, password);
-            window.location.href = "/dashboard";
+
+            // Redirige vers la page demandée ou vers le tableau de bord par défaut
+            const redirectTo = location.state?.from || '/dashboard';
+            navigate(redirectTo);
+
             console.log('Utilisateur connecté');
         } catch (error) {
             setError(error.message);
         }
     };
+
 
     return (
         <Box
