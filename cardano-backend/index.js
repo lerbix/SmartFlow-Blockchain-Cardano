@@ -269,14 +269,16 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     // --------------------------- Crypter le document   -------------------------------- //
 
 
-    const dataUser = await getInfoDestinataireFromUUID(senderUserId).then(res => {
+    const dataUser = await getInfoDestinataireFromEmail(emailReceiver).then(res => {
         console.log('Information recupérées : (Public Key)');
         return  res;
     }).catch(err => {
         console.log('Erreur : Information non recuperé (Public Key)');
+        throw Error('Erreur : Information non recuperé (Public Key)');
     });
 
 
+    console.log(dataUser);
 
     const publicKeyRecv = dataUser.publicKey;
     const encryptedFilePath = encryptFile(file.path, publicKeyRecv);
@@ -345,7 +347,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
 
-
         let emailSucces = await transporter.sendMail(mailOptions).then(res => {
             return true;
         }).catch(err => {
@@ -361,8 +362,8 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         const FileHistory =
             {
 
-                senderEmail: emailReceiver,
-                receiverEmail: senderEmail,
+                senderEmail: senderEmail,
+                receiverEmail: emailReceiver,
                 transactionID: tx,
                 ipfsCID: CID,
                 nomFichier : originalname,
@@ -408,6 +409,7 @@ const storeFileHistory = async (fileHistory) => {
 app.post('/receive-file2',upload.none(), async (req, res) => {
     const { cid, tx, uuid, originaName} = req.body;
 
+    console.log(req.body);
     // do something with the CID here
     console.log(`Received CID: `+cid);
     console.log(`Received TX : `+ tx);
@@ -439,7 +441,6 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         console.log('Recuperation des informations reussies (private Key )');
         return res.privateKey;
     }).catch(err => console.log('erreur lors de la recuperation '));
-
 
     // Déchiffrer le fichier
     const decryptedFilePath = decryptFile(fileFromIPFS, privateKey);
