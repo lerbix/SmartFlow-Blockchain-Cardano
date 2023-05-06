@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc} from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
-import {Badge, Box, Button, Card, Container, Heading, Spinner} from "@chakra-ui/react";
+import {Badge, Box, Button, Card, Container, Heading, HStack, Spinner} from "@chakra-ui/react";
 import AuthenticationService from "../../services/AuthenticationService.js";
 
 // Initialize Firebase
@@ -115,16 +115,29 @@ const Dashboard = () => {
                             </Button>
                                 )}
                             {isWalletConnected && (
-                                <Button my={3} onClick={handleDisconnect}>
-                                    Disconnect Your Cardano Wallet CLI
-                                </Button>
+
+                                <HStack spacing={4}>
+                                    <Button my={3} onClick={handleDisconnect}>
+                                        Disconnect Your Cardano Wallet
+                                    </Button>
+                                    <Button my={3} onClick={()=>window.location.href = "/WalletInfo"}>
+                                       Consulter votre Wallet
+                                    </Button>
+                                </HStack>
+
+
                             )}
-                            <Button  my={3} onClick={()=>window.location.href = "/historySent"}>
-                                Historique des fichiers Envoyés
-                            </Button>
-                            <Button  my={3} onClick={()=>window.location.href = "/historyReceived"}>
-                                Historique des fichiers Recus
-                            </Button>
+
+                            <Heading size="md" p={4} >Historique </Heading>
+                            <HStack spacing={3}>
+                                <Button  my={3} onClick={()=>window.location.href = "/historySent"}>
+                                    Historique des fichiers Envoyés
+                                </Button>
+                                <Button  my={3} onClick={()=>window.location.href = "/historyReceived"}>
+                                    Historique des fichiers Recus
+                                </Button>
+                            </HStack>
+
                         </Box>
                     </Card>
 
