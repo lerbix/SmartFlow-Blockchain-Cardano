@@ -402,9 +402,6 @@ const storeFileHistory = async (fileHistory) => {
 };
 
 
-
-
-
 //Recieve file Part
 app.post('/receive-file2',upload.none(), async (req, res) => {
     const { cid, tx, uuid, originaName} = req.body;
@@ -523,6 +520,51 @@ app.get('/download/:fileName', (req, res) => {
             fs.unlinkSync(filePath);
         }
     });
+});
+
+app.post('/WalletInfo',async (req, res) => {
+    const {uuid} = req.body;
+    console.log('Walet Info : ');
+    console.log('Received uid : ' + uuid);
+
+
+    try {
+        const walletId = await getInfoDestinataireFromUUID(uuid)
+            .then((res)=>{
+                return res.walletId;
+            }).catch(err => {
+                console.log("Erreur lors de la recuperation de la walletID");
+                throw Error('Wallet Not Connected ');
+            });
+
+
+        const wallet = await walletServer.getShelleyWallet(walletId).then(res => {
+            return res;
+        }).catch(err => {
+            console.log("Erreur lors de la recuperation de la wallet");
+            throw Error('Wallet Not Found ');
+        });
+
+        const dataToSend = {
+            id : wallet.id,
+            address_pool_gap : wallet.address_pool_gap,
+            balance : wallet.balance,
+            name : wallet.name,
+            state : wallet.state,
+        }
+        res.status(200).send({
+            message: 'Information Récupérés avec succes',
+            walletData : dataToSend,
+        });
+        console.log('informations du Wallet récupérés et transmises');
+    }catch (e) {
+        res.status(500).send({
+            message : e.message,
+        })
+
+    }
+
+
 });
 
 function decryptFile(inputData, privateKey) {
@@ -651,7 +693,8 @@ async function getInfoDestinataireFromUUID(uuid){
             uuid: userRecord.uid,
             addressDest: userDoc.get('walletAddress'),
             publicKey : userDoc.get('publicKey'),
-            privateKey: userDoc.get('privateKey')
+            privateKey: userDoc.get('privateKey'),
+            walletId : userDoc.get('walletId'),
         }
         //console.log(dataDest);
         //console.log(`Adresse de portefeuille de destinataire : ${dataDest.addressDest}`);
