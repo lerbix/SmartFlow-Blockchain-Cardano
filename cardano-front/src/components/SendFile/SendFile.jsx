@@ -277,9 +277,11 @@ function SendFile({buildSendTransaction}) {
                         "Envoyer"
                     )}
                 </Button>
-                <Button  mt={4} ml={4} colorScheme="gray" onClick={()=> window.location.href ="/dashboard"}>
-                    retour
-                </Button>
+                {!isLoading && (
+                    <Button mt={4} ml={4} colorScheme="gray" onClick={() => window.location.href = "/dashboard"}>
+                        Retour
+                    </Button>
+                )}
 
                 {showLink && (
                     <Box
