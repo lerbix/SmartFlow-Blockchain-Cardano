@@ -1,5 +1,17 @@
 import {useParams, useSearchParams} from "react-router-dom";
-import {Box, Button, Center, Spinner, Heading, Link, Text, useToast} from "@chakra-ui/react";
+import {
+    Card,
+    Box,
+    Button,
+    Center,
+    Spinner,
+    Heading,
+    Link,
+    Text,
+    useToast,
+    CardHeader,
+    StackDivider, CardBody, Stack, Flex, Highlight
+} from "@chakra-ui/react";
 import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -85,15 +97,15 @@ const FileReceiver = () => {
     };
 
     return (
-        <Box>
-            <Center>
-                <Heading as="h2" size="lg" mb={4}>
-                    Réception du fichier
+        <div>
+            <Heading>Réception du fichier</Heading>
+        <Card mt={5}>
+            <CardHeader>
+                <Heading textAlign="left" mb={4} fontWeight={"semibold"}>
+                    Description du composant de réception du fichier.
                 </Heading>
-            </Center>
-            <Text textAlign="center" mb={4}>
-                Description du composant de réception du fichier.
-            </Text>
+            </CardHeader>
+
 
             {isLoading && <Spinner
                 thickness='4px'
@@ -105,41 +117,70 @@ const FileReceiver = () => {
 
 
             {user && (<>
-                <Text textAlign="center" mb={4}>
-                You : {user.email}
-                 </Text>
+                <CardBody textAlign="left">
+                    <Stack divider={<StackDivider />} spacing='4'>
+                        <Box>
+                            <Heading size='xs' textTransform='uppercase'>
+                                <Highlight query='YOUREMAIL' styles={{ px: '1', py: '1', bg: 'orange.100' }}>YourEmail</Highlight>
+                            </Heading>
+                            <Text pt='2' fontSize='sm'>
+                                {user.email}
+                            </Text>
+                        </Box>
 
-                <Text textAlign="center" mb={4}>
-                CID : {cid}
-                </Text>
+                        <Box>
+                            <Heading size='xs' textTransform='uppercase'>
+                                <Highlight query='CID' styles={{ px: '1', py: '1', bg: 'orange.100' }}>CID </Highlight>                           </Heading>
+                            <Text pt='2' fontSize='sm'>
+                                {cid}
+                            </Text>
+                        </Box>
 
-                <Text textAlign="center" mb={4}>
-                Transaction ID : {tx}
-                </Text>
-                <Text textAlign="center" mb={4}>
-                Sender ID : {uuidSender}
-                </Text>
+                        <Box>
+                            <Heading size='xs' textTransform='uppercase'>
+                                <Highlight query='Transaction ID' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Transaction ID</Highlight>                            </Heading>
+                            <Text pt='2' fontSize='sm'>
+                                {tx}
+                            </Text>
+                        </Box>
+
+                        <Box>
+                            <Heading size='xs' textTransform='uppercase'>
+                                <Highlight query='Sender ID' styles={{ px: '1', py: '1', bg: 'orange.100' }}> Sender ID </Highlight>
+                            </Heading>
+                            <Text pt='2' fontSize='sm'>
+                                {uuidSender}
+                            </Text>
+                        </Box>
+
+                    </Stack>
+                </CardBody>
+
             {/* Add the hidden anchor tag */}
                 <a href={downloadLink} ref={hiddenDownloadLink} download style={{ display: 'none' }}></a>
 
-                <Center>
-                <Button onClick={handleFileReceive} colorScheme="blue">
-            {isLoading ? (
-                <Spinner size="sm" mr="2" />
-                ) : (
-                "Recevoir un fichier"
-                )}
-                </Button>
-                </Center>
             </>)
             }
+        </Card>
+            <Flex alignItems="center" justifyContent="center">
+            <Center>
+                <Button onClick={handleFileReceive} colorScheme="blue" mt={5}>
+                    {isLoading ? (
+                        <Spinner size="sm" mr="2" />
+                    ) : (
+                        "Recevoir un fichier"
+                    )}
+                </Button>
+            </Center>
             {!isLoading && (
                 <Button mt={4} ml={4} colorScheme="gray" onClick={() => window.location.href = "/dashboard"}>
                     Retour
                 </Button>
             )}
+            </Flex>
 
-        </Box>
+
+    </div>
     );
 };
 
