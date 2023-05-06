@@ -133,7 +133,11 @@ const FileReceiver = () => {
                 </Center>
             </>)
             }
-
+            {!isLoading && (
+                <Button mt={4} ml={4} colorScheme="gray" onClick={() => window.location.href = "/dashboard"}>
+                    Retour
+                </Button>
+            )}
 
         </Box>
     );
