@@ -214,6 +214,13 @@ function SendFile({buildSendTransaction}) {
 
     return (
         <Box maxW="xl" mx="auto" p={4}>
+            {isLoading && <Spinner
+                thickness='4px'
+                speed='0.65s'
+                emptyColor='gray.200'
+                color='blue.500'
+                size='xl'
+            />}
             <form noValidate onSubmit={handleSubmit}>
 
                 {formError && (
