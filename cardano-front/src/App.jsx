@@ -17,6 +17,7 @@ import SendFilePage from "./pages/SendFilePage.jsx";
 import HistorySent from "./pages/HistorySent.jsx";
 import HistoryReceived from "./pages/HistoryReceived.jsx";
 import AuthWrapper from "./components/AuthWrapper.jsx";
+import WalletInfo from "./components/WalletInfo.jsx";
 function App() {
   const [count, setCount] = useState(0)
 
@@ -34,6 +35,7 @@ function App() {
                   <Route path={'/receive-file2'} element={<AuthWrapper> <FileReceiver/> </AuthWrapper>} />
                   <Route path={"/walletCli"} element={<AuthWrapper> <WalletConnectorCli/> </AuthWrapper>} />
                   <Route path={"/historySent"} element={<AuthWrapper> <HistorySent/> </AuthWrapper>} />
+                  <Route path={"/WalletInfo"} element={<AuthWrapper> <WalletInfo/> </AuthWrapper>} />
                   <Route path={"/historyReceived"} element={<AuthWrapper> <HistoryReceived/> </AuthWrapper>} />
               </Routes>
           </Router>
