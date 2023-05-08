@@ -15,8 +15,14 @@ import {
 import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import {doc, getDoc} from "firebase/firestore";
+import {doc, getDoc, getFirestore} from "firebase/firestore";
+import firebaseConfig from "../../utils/firebaseConfig.js";
+import {initializeApp} from "firebase/app";
+const app = initializeApp(firebaseConfig);
 
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
+const db = getFirestore(app);
 const FileReceiver = () => {
 
     // localhost:5173/receive-file2?Cid=QmPYtTJzSQZJEFCLgTo1NKc5GsS7ir9frFRfZdQKqiKJ9G&Tx=af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
@@ -61,9 +67,21 @@ const FileReceiver = () => {
     console.log(cid);
     console.log(tx);
 
-    const handleFileReceive = () => {
+
+    const handleFileReceive =async () => {
+        const user = auth.currentUser;
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc =  await getDoc(userDocRef);
+        const userData = userDoc.data();
+        const walletId=userData.walletId;
+        const walletPassphrase=userData.passphrase;
+
+
+
+        console.log("walletId: "+walletId);
+
         setIsLoading(true);
-        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName,})
+        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName, walletId, walletPassphrase})
             .then(response => {
                 setDownloadLink(`http://localhost:3002/download/${response.data.fileName}`);
                 console.log(downloadLink);
@@ -100,22 +118,22 @@ const FileReceiver = () => {
         <div>
             <Heading>Réception du fichier</Heading>
         <Card mt={5}>
+
             <CardHeader>
                 <Heading textAlign="left" mb={4} fontWeight={"semibold"}>
                     Description du composant de réception du fichier.
                 </Heading>
             </CardHeader>
+            <Center>
+                {isLoading && <Spinner
+                    thickness='4px'
+                    speed='0.65s'
+                    emptyColor='gray.200'
+                    color='blue.500'
+                    size='xl'
+                />}
 
-
-            {isLoading && <Spinner
-                thickness='4px'
-                speed='0.65s'
-                emptyColor='gray.200'
-                color='blue.500'
-                size='xl'
-            />}
-
-
+            </Center>
             {user && (<>
                 <CardBody textAlign="left">
                     <Stack divider={<StackDivider />} spacing='4'>
