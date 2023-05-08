@@ -296,7 +296,8 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     // ETAPE 2 : ENVOIE A LA BLOCKCHAIN
 
     let wallet = await walletServer.getShelleyWallet(walletId);
-    let tx = await sendToBlockChain2(wallet, walletPassphrase, hashFile).then((result )=>{
+        let currentTime = new Date().toISOString();
+        let tx = await sendToBlockChain2(wallet, walletPassphrase, hashFile, currentTime).then((result )=>{
         console.log("Envoie à la blockchain reussie !" );
         console.log("tx : " + result.id);
         return result.id;
@@ -404,7 +405,7 @@ const storeFileHistory = async (fileHistory) => {
 
 //Recieve file Part
 app.post('/receive-file2',upload.none(), async (req, res) => {
-    const { cid, tx, uuid, originaName} = req.body;
+    const { cid, tx, uuid, originaName, walletId, walletPassphrase} = req.body;
 
     console.log(req.body);
     // do something with the CID here
@@ -412,6 +413,9 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
     console.log(`Received TX : `+ tx);
     console.log(`Received uuid : `+ uuid);
     console.log(`Received fileName : `+ originaName);
+    console.log('wallet ID:'+walletId);
+    console.log('wallet passphrase: '+walletPassphrase);
+
 
 
     // Récuperation du Hash de la blockChain
@@ -463,6 +467,52 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         const userDocRef = usersRef.doc(uuid);
         const userDocSnapshot = await userDocRef.get();
 
+// Récuperation du Hash de la blockChain
+        let dateFromBlockChain = await getMetaDataFromTx2(tx)
+            .then(res => {
+                console.log('Received dateSent From BlockChain : ' + res)
+                return res;
+            })
+            .catch(err => {
+                console.log('Erreur lors de la récupération des métadonnées de la transaction' + err)
+            });
+
+        //ENVOIE A LA BLOCKCHAIN
+
+        let wallet = await walletServer.getShelleyWallet(walletId);
+
+        const message='The file you uploaded has been reccd eived';
+        let currentTime = new Date().toISOString();
+        let txre = await sendToBlockChain3(wallet, walletPassphrase, message, currentTime,dateFromBlockChain).then((result )=>{
+            console.log("Envoie à la blockchain reussie !" );
+            console.log("tx : " + result.id);
+            return result.id;
+        }).catch(e => {
+            console.log('Erreur lors de Envoie à la blockChain');
+            throw new Error("Erreur lors de l'envoie à la blockChain");
+        });
+
+        const mnemonic="payment pear mammal youth ivory upgrade slush razor eye ghost swift maximum oxygen symptom fiscal network powder someone glue trend world alley mouse odor";
+        let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
+
+
+
+
+
+/*
+        let txre = await sendToBlockChain1(wallet, mnemonic_sentence, message,tx ).then((result )=>{
+            console.log("Envoie à la blockchain reussie !" );
+            console.log("txre : " + result);
+            return result;
+        }).catch(e => {
+            console.log('Erreur lors de Envoie à la blockChain');
+            throw new Error("Erreur lors de l'envoie à la blockChain");
+        });
+
+
+ */
+
+
         const userEmail = userDocSnapshot.data().email;
         var transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -474,8 +524,8 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         var mailOptions = {
             from: 'bkl.abdel7@gmail.com',
             to: userEmail,
-            subject: 'File uploaded to IPFS',
-            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p>`
+            subject: 'Accusé de récéption',
+            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p><p>The transaction ID is:{$txre} </p>`
         };
 
         transporter.sendMail(mailOptions, function(error, info){
@@ -603,7 +653,12 @@ async function getMetaDataFromTx(tx){
         return hashFile;
 }
 
-
+async function getMetaDataFromTx2(tx){
+    const metadata = await API.txsMetadata(tx);
+    let  {json_metadata} = metadata[1];
+    const datesent = json_metadata;
+    return datesent;
+}
 
 async function getFileFromIPFS2(cid) {
     try {
@@ -728,7 +783,7 @@ async function getInfoDestinataireFromEmail(email){
 
 
 
-async function sendToBlockChain1(wallet, recoveryPhrase){
+async function sendToBlockChain1(wallet, recoveryPhrase, message, transaction){
 
 
     // get first unused wallet's address
@@ -740,16 +795,12 @@ async function sendToBlockChain1(wallet, recoveryPhrase){
     let info = await walletServer.getNetworkInformation();
     let ttl = info.node_tip.absolute_slot_number * 12000;
 
+    let currentTime = new Date().toISOString();
     // you can include metadata
     let data = {
-        0: 'hello',
-        1: Buffer.from('2512a00e9653fe49a44a5886202e24d77eeb998f', 'hex'),
-        4: [1, 2, {0: true}],
-        5: {
-            'key': null,
-            'l': [3, true, {}]
-        },
-        6: undefined
+        0: message,
+        1: currentTime,
+        2: transaction,
     };
 
 
@@ -775,17 +826,33 @@ async function sendToBlockChain1(wallet, recoveryPhrase){
     // submit the tx into the blockchain
     let signed = Buffer.from(txBody.to_bytes()).toString('hex');
     //console.log(signed);
-    //let txId = await walletServer.submitTx(signed);
+    let txId = await walletServer.submitTx(signed);
 
-    //return txId; // cf8b04e3319f46b3363c42d05a4313ab4ceca58fd07a4772e3397667456dd37d
+    return txId; // cf8b04e3319f46b3363c42d05a4313ab4ceca58fd07a4772e3397667456dd37d
 }
 
-async function sendToBlockChain2(wallet, walletPassphrase, hash){
+async function sendToBlockChain2(wallet, walletPassphrase, hash, time){
     const senderWallet = wallet;
     const metadata = {
-        0: hash
+        0: hash,
+        1: time,
     };
 
+    //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
+    let receiverAddress = (await senderWallet.getUnusedAddresses()).slice(0, 1);
+    const amounts = [1000000]; // ADA
+    let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
+    //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
+    //console.log(transaction);
+    return transaction;
+};
+
+async function sendToBlockChain3(wallet, walletPassphrase, message,time, sentTime){
+    const senderWallet = wallet;
+
+    const metadata=[message,time,sentTime];
+
+    //console.log("metadata 0 : "+metadata[0]);
     //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
     let receiverAddress = (await senderWallet.getUnusedAddresses()).slice(0, 1);
     const amounts = [1000000]; // ADA
