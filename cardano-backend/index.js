@@ -617,6 +617,58 @@ app.post('/WalletInfo',async (req, res) => {
 
 });
 
+
+
+app.post('/check-file', upload.single('file'), async (req, res) => {
+
+
+
+
+    const file = req.file;
+    const {originalname} = file;
+    console.log("FileName : "+originalname);
+
+    let isHashSucces = false;
+    //let isCryptSucces = false;
+
+
+    // --------------------------- ETAPE 1 -------------------------------- //
+    // --------------------------- Hash   -------------------------------- //
+
+    // Calculer le hash du fichier en utilisant la bibliothèque crypto
+
+    try {
+        const hashFile = await hashFromFile(file.path).then(res=>{
+            isHashSucces = true;
+            console.log('Le hash du fichier est : ' + res);
+            return res;
+        }).catch(err => {
+            isHashSucces = false;
+            console.log('Erreur lors du hash du document');
+        });
+        const transactionId = await checkHashExists(originalname);
+        console.log('Transaction ID:', transactionId);
+        const hashFileblock =await getMetaDataFromTx(transactionId);
+        console.log("the hash of the file from the blockChain is: "+hashFileblock);
+
+        if(compareHashes(hashFileblock,hashFile)){
+            res.status(200).send({
+                message: 'Le document est authentique',
+                hashduFichier : hashFile,
+            });
+        }else{
+            console.log("Le document n'est pas authentique");
+            res.status(500).send({message: "Le document n'est pas authentique"});
+        }
+
+    } catch (error) {
+        console.log('Envoie du fichier échoué')
+        res.status(500).send({message: error.message});
+    }
+
+});
+
+
 function decryptFile(inputData, privateKey) {
     const extSize = inputData.readUInt16BE(0);
     const extBuffer = inputData.slice(2, 2 + extSize);
@@ -863,6 +915,16 @@ async function sendToBlockChain3(wallet, walletPassphrase, message,time, sentTim
 };
 
 
+const checkHashExists = async (fileName) => {
+    const fileHistoryRef = admin.firestore().collection('fileHistory');
+    const querySnapshot = await fileHistoryRef.where('nomFichier', '==', fileName).get();
+    const fileHistory = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    }));
+    const transactionId = fileHistory.length > 0 ? fileHistory[0].transactionID : null;
+    return transactionId;
+}
 
 
 app.listen(3002, () => {
