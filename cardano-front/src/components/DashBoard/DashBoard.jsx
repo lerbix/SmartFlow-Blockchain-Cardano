@@ -106,6 +106,9 @@ const Dashboard = () => {
 
                             <Button colorScheme="red" mt={4} onClick={handleLogout}>Déconnexion</Button>
                             <Button colorScheme="yellow" mt={4} ml={4} onClick={ ()=>window.location.href = "/edit-profile"} >Modifier profil</Button>
+                            <Button ml={4} mt={4} onClick={ ()=>window.location.href = "/Check"}>
+                                CheckDocument
+                            </Button>
                             {isWalletConnected && (
                                 <Button colorScheme="blue" mt={4} ml={4} onClick={() => window.location.href = "/send-file"} >Send</Button>
                             )}
@@ -123,7 +126,10 @@ const Dashboard = () => {
                                     <Button my={3} onClick={()=>window.location.href = "/WalletInfo"}>
                                        Consulter votre Wallet
                                     </Button>
+
                                 </HStack>
+
+
 
 
                             )}
