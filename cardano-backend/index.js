@@ -66,8 +66,8 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             walletRewardBalance : wallet.getRewardBalance(),
             walletTotalBalance : wallet.getTotalBalance(),
             walletAddress:await wallet.getAddressAt(0),
-            privateKey:  privateKey,
-            publicKey: accountKey,
+            privateKey:  privateKey.to_bech32(),
+            publicKey: accountKey.to_bech32(),
         }
 
         console.log(data);
@@ -405,7 +405,7 @@ const storeFileHistory = async (fileHistory) => {
 
 //Recieve file Part
 app.post('/receive-file2',upload.none(), async (req, res) => {
-    const { cid, tx, uuid, originaName, walletId, walletPassphrase} = req.body;
+    const { cid, tx, uuid, originaName} = req.body;
 
     console.log(req.body);
     // do something with the CID here
@@ -413,8 +413,9 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
     console.log(`Received TX : `+ tx);
     console.log(`Received uuid : `+ uuid);
     console.log(`Received fileName : `+ originaName);
-    console.log('wallet ID:'+walletId);
-    console.log('wallet passphrase: '+walletPassphrase);
+    //console.log('wallet passphrase: '+walletPassphrase);
+
+
 
 
 
@@ -467,7 +468,7 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         const userDocRef = usersRef.doc(uuid);
         const userDocSnapshot = await userDocRef.get();
 
-// Récuperation du Hash de la blockChain
+        // Récuperation du Hash de la blockChain
         let dateFromBlockChain = await getMetaDataFromTx2(tx)
             .then(res => {
                 console.log('Received dateSent From BlockChain : ' + res)
@@ -479,8 +480,10 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
         //ENVOIE A LA BLOCKCHAIN
 
-        let wallet = await walletServer.getShelleyWallet(walletId);
 
+
+
+        /*
         const message='The file you uploaded has been reccd eived';
         let currentTime = new Date().toISOString();
         let txre = await sendToBlockChain3(wallet, walletPassphrase, message, currentTime,dateFromBlockChain).then((result )=>{
@@ -491,15 +494,12 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
             console.log('Erreur lors de Envoie à la blockChain');
             throw new Error("Erreur lors de l'envoie à la blockChain");
         });
+         */
+
 
         const mnemonic="payment pear mammal youth ivory upgrade slush razor eye ghost swift maximum oxygen symptom fiscal network powder someone glue trend world alley mouse odor";
         let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
 
-
-
-
-
-/*
         let txre = await sendToBlockChain1(wallet, mnemonic_sentence, message,tx ).then((result )=>{
             console.log("Envoie à la blockchain reussie !" );
             console.log("txre : " + result);
@@ -510,7 +510,7 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         });
 
 
- */
+
 
 
         const userEmail = userDocSnapshot.data().email;
@@ -576,8 +576,7 @@ app.post('/WalletInfo',async (req, res) => {
     const {uuid} = req.body;
     console.log('Walet Info : ');
     console.log('Received uid : ' + uuid);
-
-
+x
     try {
         const walletId = await getInfoDestinataireFromUUID(uuid)
             .then((res)=>{
@@ -595,12 +594,15 @@ app.post('/WalletInfo',async (req, res) => {
             throw Error('Wallet Not Found ');
         });
 
+        const walletdAddress = await wallet.getAddressAt(0);
+
         const dataToSend = {
             id : wallet.id,
             address_pool_gap : wallet.address_pool_gap,
             balance : wallet.balance,
             name : wallet.name,
             state : wallet.state,
+            walletdAddress : walletdAddress,
         }
         res.status(200).send({
             message: 'Information Récupérés avec succes',
