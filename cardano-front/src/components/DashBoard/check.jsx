@@ -23,7 +23,7 @@ import {
     FormHelperText,
     Alert,
     AlertIcon,
-    AlertTitle, VStack, Code, Link, HStack, Spinner, Tooltip,
+    AlertTitle, VStack, Code, Link, HStack, Spinner, Tooltip, Stack, StackDivider, Highlight, CardBody, Card,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
@@ -52,8 +52,7 @@ function Check({buildSendTransaction}) {
     const [fileError, setFileError] = useState("");
     const [formError, setFormError] = useState("");
     const [isLoading, setIsLoading] = useState(false); // new state variable
-
-
+    const [fileInfo, setFileInfo] = useState(null); // new state variable
 
 
 
@@ -78,23 +77,21 @@ function Check({buildSendTransaction}) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setFileInfo(null);
         setIsLoading(true);
 
         if (!file) {
             setFileError("Le fichier est requis !");
             setFormError('Veuillez vérifier vos informations !');
+            setIsLoading(false);
             return;
         }
-
-
 
         if ( fileError){
             setFormError('Veuillez vérifier vos informations !');
+            setIsLoading(false);
             return;
         }
-
-        console.log("submitted !");
-
 
 
 
@@ -133,6 +130,8 @@ function Check({buildSendTransaction}) {
                 });
                 console.log("Réponse du serveur :", response.data);
                 console.log(response.data);
+                setFileInfo(response.data.fileInfo);
+                console.log(fileInfo)
                 setIsLoading(false);
             } else {
                 toast({
@@ -176,6 +175,10 @@ function Check({buildSendTransaction}) {
 
                 )}
 
+
+
+
+
                 <FormControl id="file" isRequired isInvalid={fileError}>
                     <FormLabel>Fichier à envoyer</FormLabel>
                     <Input type="file" onChange={handleFileChange} />
@@ -200,6 +203,81 @@ function Check({buildSendTransaction}) {
                     <Button mt={4} ml={4} colorScheme="gray" onClick={() => window.location.href = "/dashboard"}>
                         Retour
                     </Button>
+                )}
+
+                {fileInfo && (
+
+                    <Card>
+                        <CardBody textAlign="left">
+                        <Stack divider={<StackDivider />} spacing='4'>
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Nom du fichier Initial' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Nom du fichier Initial</Highlight>
+                                </Heading>
+                                <Text pt='2' fontSize='sm'>
+                                    {fileInfo.fileName}
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Date Envoie' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Date Envoie </Highlight>                           </Heading>
+                                <Text pt='2' fontSize='sm'>
+                                    {fileInfo.dateEnvoie}
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Date Recu ' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Date Recu </Highlight>                            </Heading>
+                                <Text pt='2' fontSize='sm'>
+                                    {fileInfo.dateRecu}
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Transaction Envoie' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Transaction Envoie</Highlight>
+                                </Heading>
+                                <HStack pt='4' fontSize='sm' justifyContent={"center"}>
+                                    <Button  as='a' target='_blank' variant='solid' href={`https://preview.cardanoscan.io/transaction/${fileInfo.transactionHash}`}>
+                                        Consulter La Transaction D'envoie
+                                    </Button>
+                                </HStack>
+                            </Box>
+
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Accusé de Réception' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Accusé de Réception</Highlight>
+                                </Heading>
+                                <HStack pt='4' fontSize='sm' justifyContent={"center"}>
+                                    <Button  as='a' target='_blank' variant='solid' href={`https://preview.cardanoscan.io/transaction/${fileInfo.transactionAccuse}`}>
+                                        Consulter L'accusé de Réception
+                                    </Button>
+                                </HStack>
+                            </Box>
+
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Authentique' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Authentique</Highlight>
+                                </Heading>
+                                <HStack pt='4' fontSize='sm' justifyContent={"center"}>
+                                    {fileInfo.isAuthentic ? (
+                                        <Badge colorScheme={"green"}>
+                                            Le fichier est authentique
+                                        </Badge>
+                                    ) : (<Badge colorScheme={"red"}>
+                                        Le fichier n'est pas authentique
+                                    </Badge>)
+                                    }
+                                </HStack>
+                            </Box>
+
+                        </Stack>
+                    </CardBody>
+
+                    </Card>
+
                 )}
 
             </form>
