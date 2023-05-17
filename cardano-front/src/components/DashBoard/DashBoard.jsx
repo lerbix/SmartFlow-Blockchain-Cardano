@@ -78,8 +78,8 @@ const Dashboard = () => {
 
 
     return (
-        <Container>
-            <Box>
+        <Container >
+            <Box >
                 <Heading size="md" p={4}>Tableau de bord</Heading>
                 {isLoading && <Spinner
                     thickness='4px'
@@ -109,18 +109,27 @@ const Dashboard = () => {
                             <Button ml={4} mt={4} onClick={ ()=>window.location.href = "/Check"}>
                                 CheckDocument
                             </Button>
+
                             {isWalletConnected && (
-                                <Button colorScheme="blue" mt={4} ml={4} onClick={() => window.location.href = "/send-file"} >Send</Button>
+                                <>
+                                    <Heading size="md" p={4} >Envoie du Fichier</Heading>
+                                <Button width={'200px'} colorScheme="blue" mt={4} ml={4} onClick={() => window.location.href = "/send-file"} >Send</Button>
+                                </>
                             )}
+
                             {!isWalletConnected && (
+                                <>
+                                    <Heading size="md" p={4} >Wallet</Heading>
                             <Button my={3} onClick={()=>window.location.href = "/walletCli"}>
                                 Connect With Cardano Wallet CLI
                             </Button>
+                                </>
                                 )}
                             {isWalletConnected && (
-
+                                <>
+                                <Heading size="md" p={4} >Wallet</Heading>
                                 <HStack spacing={4}>
-                                    <Button my={3} onClick={handleDisconnect}>
+                                    <Button colorScheme={"red"} my={3} onClick={handleDisconnect}>
                                         Disconnect Your Cardano Wallet
                                     </Button>
                                     <Button my={3} onClick={()=>window.location.href = "/WalletInfo"}>
@@ -128,9 +137,7 @@ const Dashboard = () => {
                                     </Button>
 
                                 </HStack>
-
-
-
+                                </>
 
                             )}
 
