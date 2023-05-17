@@ -9,7 +9,7 @@ import {
     Tbody,
     Tr,
     Th,
-    Td, Heading, Link, Button,
+    Td, Heading, Link, Button, Container,
 } from '@chakra-ui/react';
 import {initializeApp} from "firebase/app";
 import firebaseConfig from "../../utils/firebaseConfig.js";
@@ -67,11 +67,7 @@ const FileReceivedHistory = () => {
         return () => unsubscribe();
     }, []);
 
-    const handleDelete = async (id) => {
-        const fileHistoryRef = collection(db, 'fileHistory');
-        await deleteDoc(doc(fileHistoryRef, id));
-        setData(data.filter((entry) => entry.id !== id));
-    };
+
     function Pagination({ currentPage, totalPages, onChangePage }) {
         const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
@@ -114,8 +110,7 @@ const FileReceivedHistory = () => {
                         <Th>Transaction ID</Th>
                         <Th>IPFS CID</Th>
                         <Th>Date et heure d'envoi</Th>
-                        <Th>Download</Th>
-                        <Th>Supprimer</Th>
+                        <Th>Reception</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -124,25 +119,31 @@ const FileReceivedHistory = () => {
                             <Td>{entry.nomFichier}</Td>
                             <Td>{entry.senderEmail}</Td>
                             <Td>
-                                <Link target="_blank" rel="noopener noreferrer" href={`https://preview.cardanoscan.io/transaction/${entry.transactionID}`}>
-                                    Consulter
-                                </Link>
+
+                                <Button as='a' target='_blank' variant='solid' href={`https://preview.cardanoscan.io/transaction/${entry.transactionID}`}>
+                                    consulter
+                                </Button>
+
                             </Td>
                             <Td>
-                                <Link target="_blank" rel="noopener noreferrer" href={`https://ipfs.io/ipfs/${entry.ipfsCID}`}>
-                                    Consulter
-                                </Link>
+                                <Button as='a' target='_blank' variant='solid' href={`https://ipfs.io/ipfs/${entry.ipfsCID}`}>
+                                    consulter
+                                </Button>
                             </Td>
                             <Td>{entry.dateSent}</Td>
                             <Td>
-                                <Link href={"http://localhost:5173/receive-file2?Cid="+entry.ipfsCID+"&tx="+entry.transactionID+"&uuid="+userId+"&fileName="+entry.nomFichier} isExternal>
-                                    <Button colorScheme="green" >Download</Button>
-                                </Link>
-                            </Td>
-                            <Td>
-                                <Button colorScheme="red" onClick={() => handleDelete(entry.id)}>
-                                    Supprimer
-                                </Button>
+                                {entry.accuseTx ?  (
+                                    <Button as='a' target='_blank' variant='solid' href={`https://preview.cardanoscan.io/transaction/${entry.accuseTx}`}>
+                                        consulter
+                                    </Button>
+                                ) : (
+
+                                    <Button  colorScheme="green"  as='a' target='_blank' variant='solid' href={"http://localhost:5173/receive-file2?Cid="+entry.ipfsCID+"&tx="+entry.transactionID+"&uuid="+userId+"&fileName="+entry.nomFichier}>
+                                        Download
+                                    </Button>
+                               )
+                                }
+
                             </Td>
                         </Tr>
                     ))}
