@@ -28,7 +28,6 @@ const FileReceiver = () => {
     // localhost:5173/receive-file2?Cid=QmPYtTJzSQZJEFCLgTo1NKc5GsS7ir9frFRfZdQKqiKJ9G&Tx=af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1
 
     const [searchParams, setSearchParams] = useSearchParams();
-
     const cid = searchParams.get("Cid");
     const tx = searchParams.get("tx");
     const uuidSender = searchParams.get('uuid');
@@ -81,13 +80,12 @@ const FileReceiver = () => {
         console.log("walletId: "+walletId);
 
         setIsLoading(true);
-        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName, walletId, walletPassphrase})
+        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName})
             .then(response => {
                 setDownloadLink(`http://localhost:3002/download/${response.data.fileName}`);
                 console.log(downloadLink);
 
                 if (response.data.compare){
-
                     toast({
                         title: response.data.message,
                         status: "success",
@@ -105,12 +103,17 @@ const FileReceiver = () => {
                 }
 
 
-
             })
             .catch(error => {
                 setIsLoading(false);
-                // Gestion des erreurs ici
-                console.log(error.response);
+
+                toast({
+                    title: 'Erreur Serveur',
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                })
+
             });
     };
 
@@ -121,7 +124,7 @@ const FileReceiver = () => {
 
             <CardHeader>
                 <Heading textAlign="left" mb={4} fontWeight={"semibold"}>
-                    Description du composant de réception du fichier.
+                    Vous avez recu un fichier !
                 </Heading>
             </CardHeader>
             <Center>
@@ -173,10 +176,8 @@ const FileReceiver = () => {
 
                     </Stack>
                 </CardBody>
-
             {/* Add the hidden anchor tag */}
                 <a href={downloadLink} ref={hiddenDownloadLink} download style={{ display: 'none' }}></a>
-
             </>)
             }
         </Card>
