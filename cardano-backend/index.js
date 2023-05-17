@@ -137,11 +137,14 @@ app.post('/register', async (req, res) => {
     const publicKey = keyPair.publicKey;
     const privateKey = keyPair.privateKey;
 
+    console.log(keyPair);
     // Enregistrer les clés dans Firestore
     const usersRef = admin.firestore().collection('users');
 
     // Créer un document pour l'utilisateur avec l'ID correspondant
     const userDoc = usersRef.doc(userId);
+
+    console.log(userDoc);
 
     // Enregistrer la clé publique
     await userDoc.set({
@@ -152,6 +155,8 @@ app.post('/register', async (req, res) => {
     await userDoc.set({
         privateKey: privateKey
     }, { merge: true });
+
+    console.log(userDoc);
 
     // Répondre avec succès
     res.status(200).send('Clés enregistrées avec succès.');
@@ -274,7 +279,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         return  res;
     }).catch(err => {
         console.log('Erreur : Information non recuperé (Public Key)');
-        throw Error('Erreur : Information non recuperé (Public Key)');
+        throw Error('Utilisateur non Inscrit dans notre Application');
     });
 
 
@@ -342,7 +347,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
                from: 'bkl.abdel7@gmail.com',
                to: emailReceiver,
                subject: 'File uploaded to IPFS',
-               html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href="https://gateway.ipfs.io/ipfs/${CID}">Download File</a></p><p>Thank you for using our service!</p>`
+               html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href={link}>Download File</a></p><p>Thank you for using our service!</p>`
            };
 
 
@@ -362,7 +367,6 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
         const FileHistory =
             {
-
                 senderEmail: senderEmail,
                 receiverEmail: emailReceiver,
                 transactionID: tx,
@@ -441,6 +445,7 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
     const privateKey = await getInfoDestinataireFromUUID(uuid).then(res => {
         console.log('Recuperation des informations reussies (private Key )');
+        console.log(res.privateKey);
         return res.privateKey;
     }).catch(err => console.log('erreur lors de la recuperation '));
 
@@ -497,18 +502,38 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
          */
 
 
-        const mnemonic="payment pear mammal youth ivory upgrade slush razor eye ghost swift maximum oxygen symptom fiscal network powder someone glue trend world alley mouse odor";
-        let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
 
-        let txre = await sendToBlockChain1(wallet, mnemonic_sentence, message,tx ).then((result )=>{
+
+
+
+
+        const walletID = 'e7bb9863ff00344380165f27a51b3a912d34e76e';
+        const mnemonic="above tornado deposit timber unlock arrive arena liar alert blouse pupil response leisure melody super";
+        const passphrase= "AdminWallet";
+
+        let currentTime = new Date().toISOString();
+        const dateToSend = {
+            fileName : fileName,
+            dateEnvoie : dateFromBlockChain,
+            dateRecu :  currentTime,
+            TransactionHash : tx,
+            HashFichierRecu : hashFileFromIPFS,
+            isAuthentic : true,
+        }
+
+        let txre = await sendToBlockChain1(walletID, mnemonic, dateToSend).then((result )=>{
             console.log("Envoie à la blockchain reussie !" );
             console.log("txre : " + result);
             return result;
         }).catch(e => {
             console.log('Erreur lors de Envoie à la blockChain');
+            console.log(e);
             throw new Error("Erreur lors de l'envoie à la blockChain");
         });
 
+
+        // Accusé de reception :
+        await setAccuseTrue(tx, txre);
 
 
 
@@ -525,7 +550,7 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
             from: 'bkl.abdel7@gmail.com',
             to: userEmail,
             subject: 'Accusé de récéption',
-            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p><p>The transaction ID is:{$txre} </p>`
+            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p><a href={'https://preview.cardanoscan.io/transaction/'+txre}>Consulter Accusé de Reception</a>`
         };
 
         transporter.sendMail(mailOptions, function(error, info){
@@ -537,10 +562,6 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
         });
 
 
-
-
-        // Accusé de reception :
-        await setAccuseTrue(tx);
 
 
 
@@ -576,7 +597,6 @@ app.post('/WalletInfo',async (req, res) => {
     const {uuid} = req.body;
     console.log('Walet Info : ');
     console.log('Received uid : ' + uuid);
-x
     try {
         const walletId = await getInfoDestinataireFromUUID(uuid)
             .then((res)=>{
@@ -631,7 +651,7 @@ app.post('/check-file', upload.single('file'), async (req, res) => {
     console.log("FileName : "+originalname);
 
     let isHashSucces = false;
-    //let isCryptSucces = false;
+
 
 
     // --------------------------- ETAPE 1 -------------------------------- //
@@ -648,15 +668,37 @@ app.post('/check-file', upload.single('file'), async (req, res) => {
             isHashSucces = false;
             console.log('Erreur lors du hash du document');
         });
-        const transactionId = await checkHashExists(originalname);
-        console.log('Transaction ID:', transactionId);
-        const hashFileblock =await getMetaDataFromTx(transactionId);
-        console.log("the hash of the file from the blockChain is: "+hashFileblock);
 
-        if(compareHashes(hashFileblock,hashFile)){
+
+        const resultat = await checkAuth(hashFile);
+
+        if(resultat.found){
+
+            const TxAcusse = resultat.document.get('accuseTx');
+
+
+            const metaData = await getAllMetaData(TxAcusse);
+
+            console.log(metaData);
+
+
+            console.log(metaData.find(i=>i.label === '1').json_metadata);
+            const dataInfo = {
+                fileName : metaData.find(i=>i.label === '1').json_metadata.fileName,
+                dateEnvoie: metaData.find(i=>i.label === '2').json_metadata.dateEnvoie,
+                dateRecu: metaData.find(i=>i.label === '3').json_metadata.dateRecu,
+                isAuthentic :  metaData.find(i=>i.label === '4').json_metadata.isAuthentic,
+                hashFileRecu : metaData.find(i=>i.label === '5').json_metadata.hashFileRecu,
+                transactionHash : metaData.find(i=>i.label === '6').json_metadata.TransactionEnvoie,
+                transactionAccuse : TxAcusse,
+            }
+
+
+
             res.status(200).send({
                 message: 'Le document est authentique',
                 hashduFichier : hashFile,
+                fileInfo : dataInfo,
             });
         }else{
             console.log("Le document n'est pas authentique");
@@ -665,6 +707,7 @@ app.post('/check-file', upload.single('file'), async (req, res) => {
 
     } catch (error) {
         console.log('Envoie du fichier échoué')
+        console.log(error)
         res.status(500).send({message: error.message});
     }
 
@@ -712,6 +755,11 @@ async function getMetaDataFromTx2(tx){
     let  {json_metadata} = metadata[1];
     const datesent = json_metadata;
     return datesent;
+}
+
+async function getAllMetaData(tx){
+    const metadata = await API.txsMetadata(tx);
+    return metadata;
 }
 
 async function getFileFromIPFS2(cid) {
@@ -771,14 +819,14 @@ async function  hashFromFile(file) {
 }
 
 
-async function setAccuseTrue(transactionID) {
+async function setAccuseTrue(transactionID, tx) {
     const fileHistoryRef = admin.firestore().collection('fileHistory');
 
     const querySnapshot = await fileHistoryRef.where('transactionID', '==', transactionID).get();
 
     if (!querySnapshot.empty) {
         querySnapshot.forEach(async (doc) => {
-            await doc.ref.update({ receiptAcknowledged: true });
+            await doc.ref.update({ receiptAcknowledged: true , accuseTx : tx});
         });
 
         console.log("Champ receiptAcknowledged mis à jour avec succès pour les documents correspondants !");
@@ -837,11 +885,13 @@ async function getInfoDestinataireFromEmail(email){
 
 
 
-async function sendToBlockChain1(wallet, recoveryPhrase, message, transaction){
+async function sendToBlockChain1(walletID, recoveryPhrase,dataToSend){
 
 
+    let wallet = await walletServer.getShelleyWallet(walletID);
     // get first unused wallet's address
-    let addresses = (await wallet.getUnusedAddresses()).slice(0, 1);
+    let addresses = (await wallet.getUnusedAddresses()).slice(0,1);
+    console.log(addresses);
     let amounts = [1000000];
     // console.log(addresses);
 
@@ -849,12 +899,27 @@ async function sendToBlockChain1(wallet, recoveryPhrase, message, transaction){
     let info = await walletServer.getNetworkInformation();
     let ttl = info.node_tip.absolute_slot_number * 12000;
 
-    let currentTime = new Date().toISOString();
     // you can include metadata
     let data = {
-        0: message,
-        1: currentTime,
-        2: transaction,
+        0: 'Accusé de Reception',
+        1: {
+            'fileName' : dataToSend.fileName,
+        },
+        2: {
+            'dateEnvoie' : dataToSend.dateEnvoie,
+        },
+        3: {
+            'dateRecu' : dataToSend.dateRecu,
+        },
+        4: {
+            'isAuthentic' : dataToSend.isAuthentic,
+        } ,
+        5: {
+            'hashFileRecu' : dataToSend.HashFichierRecu,
+        },
+        6: {
+            'TransactionEnvoie':dataToSend.TransactionHash,
+        }
     };
 
 
@@ -884,6 +949,7 @@ async function sendToBlockChain1(wallet, recoveryPhrase, message, transaction){
 
     return txId; // cf8b04e3319f46b3363c42d05a4313ab4ceca58fd07a4772e3397667456dd37d
 }
+
 
 async function sendToBlockChain2(wallet, walletPassphrase, hash, time){
     const senderWallet = wallet;
@@ -917,16 +983,33 @@ async function sendToBlockChain3(wallet, walletPassphrase, message,time, sentTim
 };
 
 
-const checkHashExists = async (fileName) => {
+const checkAuth = async (targetHash) => {
     const fileHistoryRef = admin.firestore().collection('fileHistory');
-    const querySnapshot = await fileHistoryRef.where('nomFichier', '==', fileName).get();
-    const fileHistory = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-    }));
-    const transactionId = fileHistory.length > 0 ? fileHistory[0].transactionID : null;
-    return transactionId;
-}
+    try {
+        // Récupérer tous les documents de la collection 'fileHistory'
+        const snapshot = await fileHistoryRef.get();
+
+        // Parcourir les documents et vérifier les hash
+        for (const doc of snapshot.docs) {
+            const transactionID = doc.data().transactionID;
+            if (transactionID) {
+                console.log("On cherche dans transaction : " + transactionID);
+                const hashDansTransaction = await getMetaDataFromTx(transactionID);
+                console.log('Hash trouvé dans : ' + transactionID + ' Hash trouvé : ' + hashDansTransaction);
+
+                if (compareHashes(targetHash, hashDansTransaction)) {
+                    console.log('Hash Trouvé et identique');
+                    return { found: true, document: doc };
+                }
+            }
+        }
+
+        return { found: false };
+    } catch (error) {
+        console.error('Erreur lors de la récupération des documents de la collection fileHistory :', error);
+    }
+};
+
 
 
 app.listen(3002, () => {
