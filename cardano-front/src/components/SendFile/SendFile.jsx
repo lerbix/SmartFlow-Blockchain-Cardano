@@ -173,7 +173,6 @@ function SendFile({buildSendTransaction}) {
         try {
             // Envoyer la requête POST avec l'instance de FormData
             const response = await axios.post("http://localhost:3002/send-file", formData);
-
             if (response.status === 200) {
                 toast({
                     title: "Réponse du serveur",
@@ -200,6 +199,10 @@ function SendFile({buildSendTransaction}) {
                 });
             }
         } catch (error) {
+            let msgErreur = 'Erreur serveur';
+            if (error.response.data.message){
+                msgErreur = error.response.data.message;
+            }
             toast({
                 title: "Erreur",
                 description: error.response.data.message,
