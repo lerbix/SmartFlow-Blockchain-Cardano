@@ -11,6 +11,8 @@ import SendFile from "./components/SendFile/SendFile.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import ReceivePage from "./components/SendFile/recieiveFile.jsx";
 import FileReceiver from "./components/SendFile/ReceiveFile.jsx";
+import SendFileForm from "./components/SendFileWallet/SendFileForm.jsx";
+import SendFileDapp from "./components/SendFileWallet/SendFile.jsx";
 import SendFilePage from "./pages/SendFilePage.jsx";
 import HistorySent from "./pages/HistorySent.jsx";
 import HistoryReceived from "./pages/HistoryReceived.jsx";
@@ -21,7 +23,7 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-      <ChakraProvider>
+
           <Router>
               <Routes>
                   <Route path="/check" element={<Check />} />
@@ -39,7 +41,10 @@ function App() {
                   <Route path={"/historyReceived"} element={<AuthWrapper> <HistoryReceived/> </AuthWrapper>} />
               </Routes>
           </Router>
-      </ChakraProvider>
+
+
+
+
   )
 }
 
