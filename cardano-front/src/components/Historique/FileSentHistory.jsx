@@ -9,7 +9,7 @@ import {
     Tbody,
     Tr,
     Th,
-    Td, Heading, Link, Button,
+    Td, Heading, Link, Button, VStack,
 } from '@chakra-ui/react';
 import {initializeApp} from "firebase/app";
 import firebaseConfig from "../../utils/firebaseConfig.js";
@@ -121,7 +121,6 @@ const FileSentHistory = () => {
                         <Th>IPFS CID</Th>
                         <Th>Date et heure d'envoi</Th>
                         <Th>Accusé de réception</Th>
-                        <Th>Supprimer</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -142,15 +141,24 @@ const FileSentHistory = () => {
                             </Td>
                             <Td>{entry.dateSent}</Td>
                             <Td>
-                                <Badge colorScheme={entry.receiptAcknowledged ? 'green' : 'red'}>
-                                    {entry.receiptAcknowledged ? 'Reçu' : 'Non reçu'}
-                                </Badge>
+
+                                {entry.receiptAcknowledged ? (
+                                    <VStack>
+                                        <Badge colorScheme={"green"}>
+                                            Reçu
+                                        </Badge>
+                                        <Link target="_blank" rel="noopener noreferrer" href={'https://preview.cardanoscan.io/transaction/'+entry.accuseTx}>
+                                            Consulter
+                                        </Link>
+                                    </VStack>
+                                ) : (
+                                    <Badge colorScheme={"red"}>
+                                        Non Reçu
+                                    </Badge>
+                                    )}
+
                             </Td>
-                            <Td>
-                                <Button colorScheme="red" onClick={() => handleDelete(entry.id)}>
-                                    Supprimer
-                                </Button>
-                            </Td>
+
                         </Tr>
                     ))}
                 </Tbody>
