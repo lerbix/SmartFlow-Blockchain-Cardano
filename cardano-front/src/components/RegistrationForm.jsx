@@ -43,7 +43,7 @@ const RegistrationForm = () => {
         const birthDate = new Date(birthdate);
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+        if (monthDiff < 0 || (monthDiff === 0 && today< birthdate)) {
             age-=1;
         }
         if (age < 18) {
