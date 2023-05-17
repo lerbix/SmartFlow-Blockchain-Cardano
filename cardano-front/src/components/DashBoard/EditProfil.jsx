@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
-import {Box, Button, FormControl, FormLabel, Input, Heading, Spinner} from "@chakra-ui/react";
+import {Box, Button, FormControl, FormLabel, Input, Heading, Spinner, Container} from "@chakra-ui/react";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -62,28 +62,31 @@ const EditProfil = () => {
 
 
     return (
-        <Box>
-            <Heading size="md">Modifier votre profil</Heading>
-            {isLoading && <Spinner />}
-            {user && (
-                <Box>
-                    <FormControl id="firstName" mt={4}>
-                        <FormLabel>Prénom</FormLabel>
-                        <Input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} />
-                    </FormControl>
-                    <FormControl id="lastName" mt={4}>
-                        <FormLabel>Nom</FormLabel>
-                        <Input type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
-                    </FormControl>
-                    <FormControl id="birthDate" mt={4}>
-                        <FormLabel>Date de naissance</FormLabel>
-                        <Input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
-                    </FormControl>
-                    <Button colorScheme="blue" mt={4} onClick={handleSaveChanges}>Enregistrer les modifications</Button>
-                    <Button colorScheme="red" mt={4} ml={4} onClick={()=>window.location.href = "/dashboard"}>Annuler</Button>
-                </Box>
-            )}
-        </Box>
+        <Container py={10}>
+            <Box>
+                <Heading size="md">Modifier votre profil</Heading>
+                {isLoading && <Spinner />}
+                {user && (
+                    <Box>
+                        <FormControl id="firstName" mt={4}>
+                            <FormLabel>Prénom</FormLabel>
+                            <Input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} />
+                        </FormControl>
+                        <FormControl id="lastName" mt={4}>
+                            <FormLabel>Nom</FormLabel>
+                            <Input type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
+                        </FormControl>
+                        <FormControl id="birthDate" mt={4}>
+                            <FormLabel>Date de naissance</FormLabel>
+                            <Input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
+                        </FormControl>
+                        <Button colorScheme="blue" mt={4} onClick={handleSaveChanges}>Enregistrer les modifications</Button>
+                        <Button colorScheme="red" mt={4} ml={4} onClick={()=>window.location.href = "/dashboard"}>Annuler</Button>
+                    </Box>
+                )}
+            </Box>
+        </Container>
+
     );
 }
 
