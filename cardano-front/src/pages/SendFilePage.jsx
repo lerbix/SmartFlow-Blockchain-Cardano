@@ -3,8 +3,10 @@ import SendFile from "../components/SendFile/SendFile.jsx";
 
 const SendFilePage = () => {
     return (
-        <Box p={4} width={500}>
-            <Container maxW="xl">
+
+        <Container>
+            <Box p={4} width={500}>
+
                 <Heading as="h1" size="xl" textAlign="center" mb={8}>
                     Envoie du fichier
                 </Heading>
@@ -12,8 +14,9 @@ const SendFilePage = () => {
                     <SendFile/>
                 </Card>
 
-            </Container>
-        </Box>
+            </Box>
+        </Container>
+
     );
 };
 
