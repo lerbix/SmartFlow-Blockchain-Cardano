@@ -25,6 +25,7 @@
     "cardano-wallet-js": "^1.4.0",
     "cardanocli-js": "^4.1.6",
     "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
     "elliptic": "^6.5.4",
     "firebase": "^9.19.1",
     "framer-motion": "^10.11.2",
