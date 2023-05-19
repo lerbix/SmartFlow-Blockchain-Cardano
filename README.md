@@ -32,7 +32,7 @@ Une fois la commande git clone terminée, vous aurez une copie locale complète 
 
 **TODO**
 
-### Partie Front
+### Configuration de la partie Front 
 Dans cette partie de la documentation, nous allons configurer la partie front-end de l'application, qui est la plus facile. Pour commencer, suivez les étapes suivantes :
 - Déplacez-vous vers le répertoire 'cardano-front' en utilisant la commande suivante :
 ```bash 
@@ -49,4 +49,9 @@ Après avoir installé les dépendances nécessaires, vous pouvez suivre les ét
 ```bash 
 npm run dev
 ```
+Après avoir exécuté la commande, vous devriez voir des informations dans votre terminal indiquant que le serveur de développement est en cours d'exécution. Il vous fournira également une URL locale où vous pourrez accéder à l'application dans votre navigateur.
 
+Veuillez noter que **vous ne pourrez pas vous connecter ou vous inscrire pour le moment**, car vous n'avez pas encore configuré Firebase. Pour configurer Firebase et permettre l'authentification dans l'application, veuillez suivre les instructions dans la partie Configuration Firebase Front.
+
+### Configuration de Firebase Front
+Dans cette partie, nous allons configuré Firebase qui nous permettera de s'authentifier, 
