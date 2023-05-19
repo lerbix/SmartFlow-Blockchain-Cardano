@@ -1,23 +1,40 @@
 const express = require('express');
+require('dotenv').config();
 const multer = require('multer'); // middleware pour gérer les fichiers
 const cors = require('cors'); // middleware pour ajouter les entêtes CORS
 const app = express();
-const { Seed, WalletServer, AddressWallet} = require('cardano-wallet-js');
+const { Seed, WalletServer} = require('cardano-wallet-js');
 const {response} = require("express");
 const crypto = require("crypto");
 const fs = require("fs");
+
+// Configuration Firbase Admin
 const admin = require('firebase-admin');
 const serviceAccount = require("./FirebaseConfigEnvLocal.json");
+
+// Configuration IPFS
 const ipfsAPI = require ('ipfs-api');
-const ipfs = ipfsAPI('127.0.0.1', '5001', {protocol: 'http'});
+const ipfsHost = process.env.IPFS_HOST;
+const ipfsPort = process.env.IPFS_PORT;
+const ipfsProtocol = process.env.IPFS_PROTOCOL;
+const ipfs = ipfsAPI(ipfsHost, ipfsPort, { protocol: ipfsProtocol });
+
+// Configuration nodeMailer
 var nodemailer = require('nodemailer');
 
-
+// Configuration Blockfrost
 const Blockfrost = require("@blockfrost/blockfrost-js");
 const path = require("path");
+const projectId = process.env.BLOCKFROST_PROJECT_ID;
 const API = new Blockfrost.BlockFrostAPI({
-    projectId: "previewD2Ua5jbVMR9r8Y2faeJuaRYvyqKCy9ko", // see: https://blockfrost.io
+    projectId: projectId,
+    // Autres options de configuration de l'API Blockfrost
 });
+
+
+// Configuration : Wallet Serveur
+const walletServerUrl = process.env.WALLET_SERVER_URL;
+const walletServer = WalletServer.init(walletServerUrl);
 
 
 
@@ -31,7 +48,6 @@ const db = admin.firestore();
 // Middleware pour gérer les fichiers envoyés
 const upload = multer({ dest: 'uploads/' });
 
-const walletServer = WalletServer.init('http://localhost:8090/v2');
 
 // Middleware pour ajouter les entêtes CORS
 app.use(cors());
@@ -308,7 +324,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         return result.id;
     }).catch(e => {
         console.log('Erreur lors de Envoie à la blockChain');
-        throw new Error("Erreur lors de l'envoie à la blockChain");
+        throw new Error("Erreur lors de l'envoie à la blockChain : " + e);
     });
 
 
@@ -320,35 +336,31 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
 
-       const fileContent = fs.readFileSync(encryptedFilePath);
-
-           const fileAdded = await ipfs.add(fileContent);
-           console.log(fileAdded);
-           const CID = await fileAdded[0].hash;
-           console.log(`File uploaded to IPFS. CID: ${CID}`);
-
+        const fileContent = fs.readFileSync(encryptedFilePath);
+       const fileAdded = await ipfs.add(fileContent);
+       console.log(fileAdded);
+       const CID = await fileAdded[0].hash;
+       console.log(`File uploaded to IPFS. CID: ${CID}`);
 
 
+       const link = 'http://localhost:5173/receive-file2?Cid='+CID+'&tx='+tx+'&uuid='+senderUserId+'&fileName='+originalname;
+       console.log(link);
 
 
-           const link = 'http://localhost:5173/receive-file2?Cid='+CID+'&tx='+tx+'&uuid='+senderUserId+'&fileName='+originalname;
-           console.log(link);
+       var transporter = nodemailer.createTransport({
+           service: 'gmail',
+           auth: {
+               user: 'bkl.abdel7@gmail.com',
+               pass: 'pwsyqofnulgyztme'
+           }
+       });
 
-
-           var transporter = nodemailer.createTransport({
-               service: 'gmail',
-               auth: {
-                   user: 'bkl.abdel7@gmail.com',
-                   pass: 'pwsyqofnulgyztme'
-               }
-           });
-
-           var mailOptions = {
-               from: 'bkl.abdel7@gmail.com',
-               to: emailReceiver,
-               subject: 'File uploaded to IPFS',
-               html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href={link}>Download File</a></p><p>Thank you for using our service!</p>`
-           };
+       var mailOptions = {
+           from: 'bkl.abdel7@gmail.com',
+           to: emailReceiver,
+           subject: 'File uploaded to IPFS',
+           html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href={link}>Download File</a></p><p>Thank you for using our service!</p>`
+       };
 
 
 
@@ -389,9 +401,21 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         });
 
 
+        // Supprimer le fichier crypté
+        fs.unlink(encryptedFilePath, (err) => {
+            if (err) {
+                console.error('Erreur lors de la suppression du fichier crypté :', err);
+            } else {
+                console.log('Le fichier crypté a été supprimé avec succès.');
+            }
+        });
+
+
        } catch (error) {
         console.log('Envoie du fichier échoué')
         res.status(500).send({message: error.message});
+        console.error(error);
+
        }
 
 });
