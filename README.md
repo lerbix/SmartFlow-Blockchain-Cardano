@@ -54,4 +54,25 @@ Après avoir exécuté la commande, vous devriez voir des informations dans votr
 Veuillez noter que **vous ne pourrez pas vous connecter ou vous inscrire pour le moment**, car vous n'avez pas encore configuré Firebase. Pour configurer Firebase et permettre l'authentification dans l'application, veuillez suivre les instructions dans la partie Configuration Firebase Front.
 
 ### Configuration de Firebase Front
-Dans cette partie, nous allons configuré Firebase qui nous permettera de s'authentifier, 
+Dans cette partie, nous allons configuré Firebase qui nous permettera de s'authentifier : 
+
+Dans le dossier 'cardano-front' : 
+
+- Localisez le fichier .env à la racine du projet.
+
+- Ouvrez le fichier .env dans un éditeur de texte.
+
+- Remplacez les valeurs des variables suivantes par les informations d'identification spécifiques à votre projet Firebase :
+    - **VITE_FIREBASE_API_KEY**: Remplacez par votre clé API Firebase.
+    - **VITE_FIREBASE_AUTH_DOMAIN**: Remplacez par votre domaine d'authentification Firebase.
+    - **VITE_FIREBASE_PROJECT_ID**: Remplacez par l'ID de votre projet Firebase.
+    - **VITE_FIREBASE_STORAGE_BUCKET**: Remplacez par le bucket de stockage Firebase que vous souhaitez utiliser.
+    - **VITE_FIREBASE_MESSAGING_SENDER_ID**: Remplacez par l'ID de l'expéditeur de messagerie Firebase.
+    - **VITE_FIREBASE_APP_ID**: Remplacez par l'ID de votre application Firebase.
+
+Une fois que vous avez remplacé les valeurs par les informations d'identification correctes, enregistrez le fichier .env.
+
+**TODO : ** Les informations d'identification Firebase que vous devez remplacer peuvent être obtenues en suivant les étapes décrites dans la documentation du projet. Veuillez consulter la documentation correspondante pour obtenir les informations d'identification spécifiques à votre projet Firebase.
+
+
+
