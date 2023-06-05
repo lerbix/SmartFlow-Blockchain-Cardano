@@ -139,8 +139,45 @@ IPFS (InterPlanetary File System) est un protocole de stockage et de partage de 
     - `IPFS_PROTOCOL` : spécifie le protocole IPFS que vous souhaitez utiliser.
 
 ### Configuration Cardano-Wallet-js
-`cardano-wallet-js` est un SDK pour Cardano qui offre plusieurs fonctionnalités. Vous pouvez l'utiliser comme client pour le portefeuille officiel de Cardano et aussi pour créer des Tokens Natifs et des NFTs.
+`cardano-wallet-js` est un SDK pour Cardano qui offre plusieurs fonctionnalités. Vous pouvez l'utiliser comme client pour le portefeuille officiel de Cardano et aussi pour créer des Tokens Natifs et des NFTs. plus d'informations sur [Cardano-wallet](https://developers.cardano.org/docs/get-started/cardano-wallet-js/)
 
+Avant de commencer à utiliser la bibliothèque, vous aurez besoin d'un serveur `cardano-wallet` en cours d'exécution. Si vous avez Docker disponible, vous pouvez simplement télécharger le `docker-compose.yml` qu'ils fournissent et le démarrer en utilisant `docker-compose` :
 
+```bash
+wget https://raw.githubusercontent.com/input-output-hk/cardano-wallet/master/docker-compose.yml
+NETWORK=testnet docker-compose up
+```
+Vous pouvez trouver plus d'informations sur les différentes options pour démarrer le serveur [ici](https://github.com/input-output-hk/cardano-wallet)
 
+ensuite : 
+
+1. Ouvrez le fichier **.env** dans cardano-backend.
+2. Recherchez la variable `WALLET_SERVER_URL`
+3. Remplacez la valeur existante par le serveur Cardano
+
+### Configuration BLOCKFROST
+
+`BLOCKFROST` est une plateforme qui fournit des outils et des services pour interagir avec la blockchain Cardano. Elle permet aux développeurs d'accéder aux données de la blockchain Cardano, de créer des applications et de gérer les transactions.
+
+Pour configurer la variable `BLOCKFROST_PROJECT_ID`, vous devez suivre les étapes suivantes :
+
+1. Accédez au site Web de BLOCKFROST à l'adresse :[lien vers blockfrost](https://blockfrost.io/)
+
+2. Créez un compte ou connectez-vous à votre compte BLOCKFROST existant.
+
+3. Une fois connecté, accédez au tableau de bord ou à la page de gestion du projet.
+
+4. Si vous n'avez pas encore créé de projet, vous devrez en créer un en cliquant sur le bouton "New Project" ou "Create New Project".
+
+5. Après avoir créé ou sélectionné votre projet, vous devriez voir une page avec les détails de votre projet.
+
+6. Recherchez l'ID du projet ou une section similaire contenant l'identifiant du projet.
+
+7. Copiez l'ID du projet, qui ressemble généralement à une série de caractères alphanumériques, par exemple : "f1a2b3c4d5e6f7g8h9".
+
+8. Ouvrez le fichier .env de configuration et recherchez la variable `BLOCKFROST_PROJECT_ID`.
+
+9. Remplacez la valeur actuelle par l'ID du projet `BLOCKFROST` que vous avez copié à l'étape précédente.
+
+10. Enregistrez les modifications et utilisez la variable `BLOCKFROST_PROJECT_ID` dans votre application pour interagir avec l'API de BLOCKFROST.
 
