@@ -364,17 +364,17 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
 
        var transporter = nodemailer.createTransport({
-           service: 'gmail',
+           service: process.env.EMAIL_SERVICE,
            auth: {
-               user: 'bkl.abdel7@gmail.com',
-               pass: 'pwsyqofnulgyztme'
+               user: process.env.EMAIL_USER,
+               pass: process.env.EMAIL_PASSWORD,
            }
        });
 
        var mailOptions = {
-           from: 'bkl.abdel7@gmail.com',
+           from: process.env.EMAIL_USER,
            to: emailReceiver,
-           subject: 'File uploaded to IPFS',
+           subject: 'SMARTFLOW CARDANO : File uploaded to IPFS',
            html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href={link}>Download File</a></p><p>Thank you for using our service!</p>`
        };
 
@@ -580,16 +580,16 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
         const userEmail = userDocSnapshot.data().email;
         var transporter = nodemailer.createTransport({
-            service: 'gmail',
+            service: process.env.EMAIL_SERVICE,
             auth: {
-                user: 'bkl.abdel7@gmail.com',
-                pass: 'pwsyqofnulgyztme'
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD,
             }
         });
         var mailOptions = {
-            from: 'bkl.abdel7@gmail.com',
+            from: process.env.EMAIL_USER,
             to: userEmail,
-            subject: 'Accusé de récéption',
+            subject: 'SMARTFLOW CARDANO : Accusé de récéption',
             html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p><a href={'https://preview.cardanoscan.io/transaction/'+txre}>Consulter Accusé de Reception</a>`
         };
 
