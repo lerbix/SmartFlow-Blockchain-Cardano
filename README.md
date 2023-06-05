@@ -30,8 +30,11 @@ Les fonctionnalités clés du projet incluent :
 
 Une fois la commande git clone terminée, vous aurez une copie locale complète du dépôt sur votre machine. Vous pouvez maintenant accédez au répertoire du projet en utilisant la commande suivante :
 
-**TODO**
+```bash
+cd tpe-blockchain-cardano-2023
+```
 
+    
 ### Configuration de la partie Front 
 Dans cette partie de la documentation, nous allons configurer la partie front-end de l'application, qui est la plus facile. Pour commencer, suivez les étapes suivantes :
 - Déplacez-vous vers le répertoire 'cardano-front' en utilisant la commande suivante :
@@ -53,8 +56,8 @@ Après avoir exécuté la commande, vous devriez voir des informations dans votr
 
 Veuillez noter que **vous ne pourrez pas vous connecter ou vous inscrire pour le moment**, car vous n'avez pas encore configuré Firebase. Pour configurer Firebase et permettre l'authentification dans l'application, veuillez suivre les instructions dans la partie Configuration Firebase Front.
 
-### Configuration de Firebase Front
-Dans cette partie, nous allons configuré Firebase qui nous permettera de s'authentifier : 
+#### Configuration de Firebase Front
+Dans cette partie, nous allons configuré Firebase [lien vers Firebase ](https://firebase.google.com/)qui nous permettera de s'authentifier : 
 
 Dans le dossier 'cardano-front' : 
 
@@ -72,7 +75,9 @@ Dans le dossier 'cardano-front' :
 
 Une fois que vous avez remplacé les valeurs par les informations d'identification correctes, enregistrez le fichier .env.
 
-**TODO : ** Les informations d'identification Firebase que vous devez remplacer peuvent être obtenues en suivant les étapes décrites dans la documentation du projet. Veuillez consulter la documentation correspondante pour obtenir les informations d'identification spécifiques à votre projet Firebase.
-
+Pour commencer, dans Firebase, vous devez créer deux collections : une appelée 'users' et une autre appelée 'fileHistory'. 
+La collection `users` aura les champs suivants : birthDate, email, firstName, lastName, walletAddress, walletId, xprK et xpuK.
+La collection `fileHistory` aura les champs suivants : dateSent, ipfsCID, nomFichier, receiptAcknowledged, receiverEmail, senderEmail, transactionID et accuseTx.
+Une fois ces collections créées, vous pouvez enregistrer les informations de vos utilisateurs sans rencontrer de problèmes.
 
 
