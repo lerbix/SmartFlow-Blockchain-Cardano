@@ -66,18 +66,66 @@ Dans le dossier 'cardano-front' :
 - Ouvrez le fichier .env dans un éditeur de texte.
 
 - Remplacez les valeurs des variables suivantes par les informations d'identification spécifiques à votre projet Firebase :
-    - **VITE_FIREBASE_API_KEY**: Remplacez par votre clé API Firebase.
-    - **VITE_FIREBASE_AUTH_DOMAIN**: Remplacez par votre domaine d'authentification Firebase.
-    - **VITE_FIREBASE_PROJECT_ID**: Remplacez par l'ID de votre projet Firebase.
-    - **VITE_FIREBASE_STORAGE_BUCKET**: Remplacez par le bucket de stockage Firebase que vous souhaitez utiliser.
-    - **VITE_FIREBASE_MESSAGING_SENDER_ID**: Remplacez par l'ID de l'expéditeur de messagerie Firebase.
-    - **VITE_FIREBASE_APP_ID**: Remplacez par l'ID de votre application Firebase.
+    
+    | Variable                           | Remplacement                                     |
+    | ---------------------------------- | ------------------------------------------------ |
+    | VITE_FIREBASE_API_KEY              | Remplacez par votre clé API Firebase.             |
+    | VITE_FIREBASE_AUTH_DOMAIN          | Remplacez par votre domaine d'authentification Firebase. |
+    | VITE_FIREBASE_PROJECT_ID           | Remplacez par l'ID de votre projet Firebase.      |
+    | VITE_FIREBASE_STORAGE_BUCKET       | Remplacez par le bucket de stockage Firebase que vous souhaitez utiliser. |
+    | VITE_FIREBASE_MESSAGING_SENDER_ID  | Remplacez par l'ID de l'expéditeur de messagerie Firebase. |
+    | VITE_FIREBASE_APP_ID               | Remplacez par l'ID de votre application Firebase. |
+
 
 Une fois que vous avez remplacé les valeurs par les informations d'identification correctes, enregistrez le fichier .env.
 
 Pour commencer, dans Firebase, vous devez créer deux collections : une appelée 'users' et une autre appelée 'fileHistory'. 
-La collection `users` aura les champs suivants : birthDate, email, firstName, lastName, walletAddress, walletId, xprK et xpuK.
-La collection `fileHistory` aura les champs suivants : dateSent, ipfsCID, nomFichier, receiptAcknowledged, receiverEmail, senderEmail, transactionID et accuseTx.
+
+La collection `users` aura les champs suivants : birthDate, email, firstName, lastName, walletAddress, walletId, xprK et xpuK. La collection `fileHistory` aura les champs suivants : dateSent, ipfsCID, nomFichier, receiptAcknowledged, receiverEmail, senderEmail, transactionID et accuseTx.
+
 Une fois ces collections créées, vous pouvez enregistrer les informations de vos utilisateurs sans rencontrer de problèmes.
 
+
+### Configuration de la partie BackEnd
+Dans cette partie de la documentation, nous allons configurer la partie back-end de l'application. Pour commencer, suivez les étapes suivantes :
+- Déplacez-vous vers le répertoire 'cardano-backend' en utilisant la commande suivante :
+```bash 
+cd cardano-backend
+```
+
+- Une fois dans le répertoire 'cardano-backend', vous pouvez installer les dépendances nécessaires en utilisant la commande suivante :
+```bash 
+npm install
+```
+### Configuration De FireBase Admin
+Les projets Firebase prennent en charge les comptes de service Google, qui vous permettent d'appeler les API du serveur Firebase depuis votre serveur d'applications ou votre environnement de confiance.
+
+Pour configurer le fichier FireBaseAdminConfigEnvLocal, vous devez générer un fichier de clé privée au format JSON. Suivez les étapes ci-dessous pour générer ce fichier pour votre compte de service :
+
+- Dans la console Firebase, ouvrez Paramètres > Comptes de service .
+
+- Cliquez sur Générer une nouvelle clé privée , puis confirmez en cliquant sur Générer la clé .
+
+- Stockez en toute sécurité le fichier JSON contenant la clé.
+
+Si vous rencontrez des problèmes lors de cette étape, référez-vous à la documentation de Firebase Admin disponible sur [Lien vers documentation FireBase Admin](https://firebase.google.com/docs/admin/setup?hl=fr)
+
+Voici à quoi ressemble le contenu du fichier `FireBaseAdminConfigEnvLocal` que vous pouvez facilement configurer en utilisant les informations de votre compte de service :
+
+```javascript
+{
+  "type": "",
+  "project_id": "",
+  "private_key_id": "",
+  "private_key": "",
+  "client_email": "",
+  "client_id": "",
+  "auth_uri": "",
+  "token_uri": "",
+  "auth_provider_x509_cert_url": "",
+  "client_x509_cert_url": ""
+}
+```
+
+Prenez le temps de remplir les champs du fichier `FireBaseAdminConfigEnvLocal` avec les valeurs correspondantes de votre compte de service Firebase. Une fois cela fait, vous aurez correctement configuré ce fichier pour votre application.
 
