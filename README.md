@@ -81,8 +81,6 @@ Une fois que vous avez remplacé les valeurs par les informations d'identificati
 
 Pour commencer, dans Firebase, vous devez créer deux collections : une appelée 'users' et une autre appelée 'fileHistory'. 
 
-La collection `users` aura les champs suivants : birthDate, email, firstName, lastName, walletAddress, walletId, xprK et xpuK. La collection `fileHistory` aura les champs suivants : dateSent, ipfsCID, nomFichier, receiptAcknowledged, receiverEmail, senderEmail, transactionID et accuseTx.
-
 Une fois ces collections créées, vous pouvez enregistrer les informations de vos utilisateurs sans rencontrer de problèmes.
 
 
@@ -128,4 +126,21 @@ Voici à quoi ressemble le contenu du fichier `FireBaseAdminConfigEnvLocal` que 
 ```
 
 Prenez le temps de remplir les champs du fichier `FireBaseAdminConfigEnvLocal` avec les valeurs correspondantes de votre compte de service Firebase. Une fois cela fait, vous aurez correctement configuré ce fichier pour votre application.
+
+### Configuration De IPFS (InterPlanetary File System)
+
+IPFS (InterPlanetary File System) est un protocole de stockage et de partage de fichiers décentralisé. Pour configurer les variables liées à IPFS, suivez les étapes ci-dessous :
+
+1. Ouvrez le fichier **.env** de votre projet.
+2. Recherchez les variables `IPFS_HOST`, `IPFS_PORT` et `IPFS_PROTOCOL`.
+3. Remplacez les valeurs existantes par les configurations souhaitées :
+    - `IPFS_HOST` : spécifie l'hôte IPFS que vous souhaitez utiliser.
+    - `IPFS_PORT` : spécifie le port IPFS que vous souhaitez utiliser.
+    - `IPFS_PROTOCOL` : spécifie le protocole IPFS que vous souhaitez utiliser.
+
+### Configuration Cardano-Wallet-js
+`cardano-wallet-js` est un SDK pour Cardano qui offre plusieurs fonctionnalités. Vous pouvez l'utiliser comme client pour le portefeuille officiel de Cardano et aussi pour créer des Tokens Natifs et des NFTs.
+
+
+
 
