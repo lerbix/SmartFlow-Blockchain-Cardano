@@ -7,7 +7,7 @@ const { Seed, WalletServer} = require('cardano-wallet-js');
 const {response} = require("express");
 const crypto = require("crypto");
 const fs = require("fs");
-
+const CryptoJS = require("crypto-js");
 // Configuration Firbase Admin
 const admin = require('firebase-admin');
 const serviceAccount = require("./FirebaseConfigEnvLocal.json");
@@ -35,6 +35,7 @@ const API = new Blockfrost.BlockFrostAPI({
 // Configuration : Wallet Serveur
 const walletServerUrl = process.env.WALLET_SERVER_URL;
 const walletServer = WalletServer.init(walletServerUrl);
+const passPhraseServ = "G)9T#J!K:4yu0z)eEG1D";
 
 
 
@@ -145,6 +146,19 @@ function generateKeyPair() {
 
     return { publicKey, privateKey };
 }
+
+function encryptKey(key, passphrase) {
+    const encrypted = CryptoJS.AES.encrypt(key, passphrase).toString();
+    return encrypted;
+}
+
+// Decryption function
+function decryptKey(encryptedKey, passphrase) {
+    const decryptedBytes = CryptoJS.AES.decrypt(encryptedKey, passphrase);
+    const decryptedKey = decryptedBytes.toString(CryptoJS.enc.Utf8);
+    return decryptedKey;
+}
+
 app.post('/register', async (req, res) => {
     const { userId } = req.body;
     console.log('User Id: ' + userId);
@@ -153,23 +167,25 @@ app.post('/register', async (req, res) => {
     const publicKey = keyPair.publicKey;
     const privateKey = keyPair.privateKey;
 
-    console.log(keyPair);
+    // Chifferer les clés:
+    const EncryptedPublicKey = encryptKey(publicKey, passPhraseServ);
+    const EncryptedPrivateKey = encryptKey(privateKey, passPhraseServ);
+
     // Enregistrer les clés dans Firestore
     const usersRef = admin.firestore().collection('users');
 
     // Créer un document pour l'utilisateur avec l'ID correspondant
     const userDoc = usersRef.doc(userId);
 
-    console.log(userDoc);
 
     // Enregistrer la clé publique
     await userDoc.set({
-        publicKey: publicKey
+        xpuK: EncryptedPublicKey
     }, { merge: true });
 
     // Enregistrer la clé privée (en prenant soin de bien protéger l'accès à cette donnée sensible)
     await userDoc.set({
-        privateKey: privateKey
+        xprK: EncryptedPrivateKey
     }, { merge: true });
 
     console.log(userDoc);
@@ -873,8 +889,8 @@ async function getInfoDestinataireFromUUID(uuid){
         const dataDest = {
             uuid: userRecord.uid,
             addressDest: userDoc.get('walletAddress'),
-            publicKey : userDoc.get('publicKey'),
-            privateKey: userDoc.get('privateKey'),
+            publicKey : decryptKey(userDoc.get('xpuK'), passPhraseServ),
+            privateKey: decryptKey(userDoc.get('xprK'), passPhraseServ),
             walletId : userDoc.get('walletId'),
         }
         //console.log(dataDest);
@@ -897,8 +913,8 @@ async function getInfoDestinataireFromEmail(email){
         const dataDest = {
             uuid: userRecord.uid,
             addressDest: userDoc.get('walletAddress'),
-            publicKey : userDoc.get('publicKey'),
-            privateKey: userDoc.get('privateKey')
+            publicKey : decryptKey(userDoc.get('xpuK'), passPhraseServ),
+            privateKey: decryptKey(userDoc.get('xprK'), passPhraseServ),
         }
         //console.log(dataDest);
         //console.log(`Adresse de portefeuille de destinataire : ${dataDest.addressDest}`);
@@ -1036,6 +1052,6 @@ const checkAuth = async (targetHash) => {
 
 
 
-app.listen(3002, () => {
+app.listen(3002, async () => {
     console.log('Serveur démarré sur le port 3002!');
 });
