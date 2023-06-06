@@ -870,14 +870,14 @@ async function getTransactionDetails(tx){
 
 async function getMetaDataFromTx(tx){
         const metadata = await API.txsMetadata(tx);
-        let  {json_metadata} = metadata[0];
+        let  {json_metadata} = metadata[1];
         const hashFile = json_metadata;
         return hashFile;
 }
 
 async function getMetaDataFromTx2(tx){
     const metadata = await API.txsMetadata(tx);
-    let  {json_metadata} = metadata[1];
+    let  {json_metadata} = metadata[2];
     const datesent = json_metadata;
     return datesent;
 }
