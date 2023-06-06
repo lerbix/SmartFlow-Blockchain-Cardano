@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import {
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    Badge,
     Box,
+    Button,
     FormControl,
+    FormErrorMessage,
+    FormHelperText,
     FormLabel,
+    HStack,
     Input,
     FormErrorMessage,
     Button,
@@ -17,22 +25,21 @@ import {
     ModalContent,
     ModalBody,
     Modal,
-    ModalOverlay,
+    ModalBody,
+    ModalContent,
     ModalHeader,
-    FormHelperText,
-    Alert,
-    AlertIcon,
-    AlertTitle, VStack, Code, Link, HStack, Spinner, Tooltip,
+    ModalOverlay,
+    Spinner,
+    Text,
+    Tooltip,
+    useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import {initializeApp} from "firebase/app";
 import firebaseConfig from "../../utils/firebaseConfig.js";
 import {getAuth} from "firebase/auth";
-import {doc, getDoc, getFirestore, updateDoc} from "firebase/firestore";
-import { useToast } from "@chakra-ui/react";
-
-
-
+import {doc, getDoc, getFirestore} from "firebase/firestore";
+import * as bip39 from "bip39";
 
 
 // Initialize Firebase
@@ -59,7 +66,8 @@ function SendFile({buildSendTransaction}) {
     const [linkTransaction, setLinkTransaction] = useState('');
     const [isSentEmail, setIsSentEmail] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // new state variable
-
+    const [mnemonic, setMnemonic] = useState(""); //
+    const [mnemonicError, setMnemonicError] = useState("");
 
 
 
@@ -80,6 +88,14 @@ function SendFile({buildSendTransaction}) {
             setEmailError("Entrez un email valide !");
         }
     };
+
+    function handleMnemonicChange(event) {
+        const mnemonicInput = event.target.value;
+        setMnemonic(mnemonicInput);
+        setMnemonicError("");
+        setFormError("");
+
+    }
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -167,6 +183,7 @@ function SendFile({buildSendTransaction}) {
         formData.append("walletId", userData.walletId);
         formData.append("userId", user.uid);
         formData.append("senderEmail", user.email);
+        formData.append("mnemonic", mnemonic);
 
 
 
@@ -275,7 +292,24 @@ function SendFile({buildSendTransaction}) {
                     ) : (
                         <FormErrorMessage>{passphraseError}</FormErrorMessage>
                     )}
+                </FormControl>
 
+
+                <FormControl id="Mnemonic" isRequired isInvalid={mnemonicError}>
+                    <FormLabel>Phrase Mnemonic</FormLabel>
+                    <Input
+                        type="text"
+                        value={mnemonic}
+                        onChange={handleMnemonicChange}
+                        placeholder="Entrez votre phrase Mnemonic"
+                    />
+                    {!mnemonicError ? (
+                        <FormHelperText>
+                            La phrase Mnemonic est utilisée pour créer une signature numérique pour ce fichier.
+                        </FormHelperText>
+                    ) : (
+                        <FormErrorMessage>{mnemonicError}</FormErrorMessage>
+                    )}
                 </FormControl>
 
 
