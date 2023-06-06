@@ -80,7 +80,7 @@ const FileReceiver = () => {
         console.log("walletId: "+walletId);
 
         setIsLoading(true);
-        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName})
+        axios.post('http://localhost:3002/receive-file2', { cid,tx, uuid: user.uid, originaName, uuidSender})
             .then(response => {
                 setDownloadLink(`http://localhost:3002/download/${response.data.fileName}`);
                 console.log(downloadLink);
