@@ -345,6 +345,23 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
 
     let wallet = await walletServer.getShelleyWallet(walletId);
         let currentTime = new Date().toISOString();
+        const dataToSend = {
+            date: currentTime,
+            hash: hashFile,
+        }
+
+        let tx = await sendToBlockChain10(walletId,mnemonic, dataToSend).then((result)=>{
+            console.log("Envoie à la blockchain reussie !" );
+            console.log("tx : " + result);
+            return result;
+        }).catch(e => {
+            console.log('Erreur lors de Envoie à la blockChain');
+            throw new Error("Erreur lors de l'envoie à la blockChain : " + e);
+        });
+
+
+
+        /*
         let tx = await sendToBlockChain2(wallet, walletPassphrase, hashFile, currentTime).then((result )=>{
         console.log("Envoie à la blockchain reussie !" );
         console.log("tx : " + result.id);
@@ -353,6 +370,8 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
         console.log('Erreur lors de Envoie à la blockChain');
         throw new Error("Erreur lors de l'envoie à la blockChain : " + e);
     });
+
+         */
 
 
 
@@ -932,6 +951,77 @@ async function getInfoDestinataireFromEmail(email){
         //console.log(`Clé de public de destinataire : ${userDoc.get(dataDest.pkDest)}`);
         return dataDest;
     }
+}
+
+
+
+async function sendToBlockChain10(walletID, recoveryPhrase,dataToSend){
+
+    console.log(recoveryPhrase);
+
+    let wallet = await walletServer.getShelleyWallet(walletID);
+    // get first unused wallet's address
+    let addresses = (await wallet.getUnusedAddresses()).slice(0,1);
+    console.log(addresses);
+    let amounts = [1000000];
+    // console.log(addresses);
+
+    // get ttl
+    let info = await walletServer.getNetworkInformation();
+    let ttl = info.node_tip.absolute_slot_number * 12000;
+
+    // get the signing keys (can be offline)
+    let rootKeySIGN = Seed.deriveRootKey(recoveryPhrase);
+    const accountKey = Seed.deriveAccountKey(rootKeySIGN);
+    const stakePrvKey = accountKey
+        .derive(CARDANO_CHIMERIC) // chimeric
+        .derive(0);
+    const privateKey = stakePrvKey.to_raw_key();
+    const signatureHash = Seed.signMessage(privateKey,  dataToSend.hash);
+    const signatureHashPartie1 = signatureHash.substring(0, signatureHash.length / 2);
+    const signatureHashPartie2 = signatureHash.substring(signatureHash.length / 2);
+
+    // you can include metadata
+    let data = {
+        0: 'Accusé d envoie',
+        1: {
+            'hash' : dataToSend.hash,
+        },
+
+        2: {
+            'dateEnvoie' : dataToSend.date,
+        },
+        3: {
+            'SignaturePartA' : signatureHashPartie1,
+        },
+        4: {
+            "SignaturePartB": signatureHashPartie2,
+        }
+    };
+
+    let coinSelection = await wallet.getCoinSelection(addresses, amounts, data);
+
+    // get the signing keys (can be offline)
+    let rootKey = Seed.deriveRootKey(recoveryPhrase);
+    let signingKeys = coinSelection.inputs.map(i => {
+        let privateKey = Seed.deriveKey(rootKey, i.derivation_path).to_raw_key();
+        return privateKey;
+    });
+
+
+    // include the metadata in the build and sign process
+    let metadata = Seed.buildTransactionMetadata(data);
+    //console.log(metadata);
+    let txBuild = Seed.buildTransaction(coinSelection, ttl, {metadata: metadata});
+    //console.log(txBuild);
+    let txBody = Seed.sign(txBuild, signingKeys, metadata);
+    //console.log(txBody);
+    // submit the tx into the blockchain
+    let signed = Buffer.from(txBody.to_bytes()).toString('hex');
+    //console.log(signed);
+    let txId = await walletServer.submitTx(signed);
+
+    return txId; // cf8b04e3319f46b3363c42d05a4313ab4ceca58fd07a4772e3397667456dd37d
 }
 
 
