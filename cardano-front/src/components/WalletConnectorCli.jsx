@@ -75,7 +75,7 @@ const WalletConnectorCli = () => {
             await updateDoc(userDocRef, {
                 walletId: walletData.walletId,
                 walletAddress: walletData.walletAddress.id,
-                //publicKey: walletData.publicKey,
+                publicKeyWallet: walletData.publicKey,
             });
             toast({
                 title: "Wallet is linked successfully.",
