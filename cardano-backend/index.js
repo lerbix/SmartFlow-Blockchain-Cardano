@@ -1159,36 +1159,9 @@ async function sendToBlockChain1(walletID, recoveryPhrase,dataToSend){
 }
 
 
-async function sendToBlockChain2(wallet, walletPassphrase, hash, time){
-    const senderWallet = wallet;
-    const metadata = {
-        0: hash,
-        1: time,
-    };
 
-    //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
-    let receiverAddress = (await senderWallet.getUnusedAddresses()).slice(0, 1);
-    const amounts = [1000000]; // ADA
-    let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
-    //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
-    //console.log(transaction);
-    return transaction;
-};
 
-async function sendToBlockChain3(wallet, walletPassphrase, message,time, sentTime){
-    const senderWallet = wallet;
 
-    const metadata=[message,time,sentTime];
-
-    //console.log("metadata 0 : "+metadata[0]);
-    //let receiverAddress = [new AddressWallet(infoDestinataire.addressDest)];
-    let receiverAddress = (await senderWallet.getUnusedAddresses()).slice(0, 1);
-    const amounts = [1000000]; // ADA
-    let transaction = await senderWallet.sendPayment(walletPassphrase, receiverAddress, amounts, metadata);
-    //let transaction = await senderWallet.getTransaction('af0465f610af989dd899a5b6142033dd8f2d3fd754e7799356e70183bbef10e1');
-    //console.log(transaction);
-    return transaction;
-};
 
 
 const checkAuth = async (targetHash) => {
