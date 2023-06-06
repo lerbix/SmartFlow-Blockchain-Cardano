@@ -3,7 +3,7 @@ require('dotenv').config();
 const multer = require('multer'); // middleware pour gérer les fichiers
 const cors = require('cors'); // middleware pour ajouter les entêtes CORS
 const app = express();
-const { Seed, WalletServer} = require('cardano-wallet-js');
+const { Seed, WalletServer, CARDANO_CHIMERIC, PublicKey} = require('cardano-wallet-js');
 const {response} = require("express");
 const crypto = require("crypto");
 const fs = require("fs");
@@ -284,6 +284,7 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
     const walletPassphrase = req.body.passphrase;
     const senderUserId = req.body.userId;
     const senderEmail = req.body.senderEmail;
+    const mnemonic = req.body.mnemonic;
 
 
 
@@ -401,12 +402,23 @@ app.post('/send-file', upload.single('file'), async (req, res) => {
            }
        });
 
-       var mailOptions = {
-           from: process.env.EMAIL_USER,
-           to: emailReceiver,
-           subject: 'SMARTFLOW CARDANO : File uploaded to IPFS',
-           html: `<p>Dear user,</p><p>The file you uploaded to our system is now available for download via IPFS. Please click on the link below to download the file:</p><p><a href={link}>Download File</a></p><p>Thank you for using our service!</p>`
-       };
+
+        var mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: emailReceiver,
+            subject: 'SMARTFLOW CARDANO : Vous avez reçu un fichier',
+            html: `<p>Cher utilisateur,</p>
+                    <p>Nous sommes ravis de vous annoncer que vous avez reçu un nouveau fichier sur notre application SmartFlow Cardano. Nous souhaitons vous informer que le fichier est maintenant disponible et que vous pouvez y accéder immédiatement.</p>
+                <p>Pour télécharger le fichier, vous avez deux options :</p>
+                <ul>
+                <li>Cliquez sur le lien suivant : <a href='${link}' >Télécharger le fichier</a></li>
+                <li>Accédez à votre historique des fichiers reçus dans l\'application.</li>
+                </ul>
+                <p>Cordialement,</p>
+                <p>L\'équipe SmartFlow Cardano</p>`
+        };
+
+
 
 
 
