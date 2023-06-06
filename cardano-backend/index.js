@@ -491,15 +491,20 @@ const storeFileHistory = async (fileHistory) => {
 
 //Recieve file Part
 app.post('/receive-file2',upload.none(), async (req, res) => {
-    const { cid, tx, uuid, originaName} = req.body;
 
-    console.log(req.body);
-    // do something with the CID here
-    console.log(`Received CID: `+cid);
-    console.log(`Received TX : `+ tx);
-    console.log(`Received uuid : `+ uuid);
-    console.log(`Received fileName : `+ originaName);
-    //console.log('wallet passphrase: '+walletPassphrase);
+
+    try {
+        const { cid, tx, uuid, originaName, uuidSender} = req.body;
+
+        console.log(req.body);
+        // do something with the CID here
+        console.log(`Received CID: `+cid);
+        console.log(`Received TX : `+ tx);
+        console.log(`Received uuid : `+ uuid);
+        console.log(`Received uuid Sender : `+ uuidSender);
+        console.log(`Received fileName : `+ originaName);
+
+        //console.log('wallet passphrase: '+walletPassphrase);
 
 
 
@@ -519,143 +524,180 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
 
 
-    // Téléchargez le fichier à partir d'IPFS
-    const fileFromIPFS =  await getFileFromIPFS2(cid);
+        // Téléchargez le fichier à partir d'IPFS
+        const fileFromIPFS =  await getFileFromIPFS2(cid);
 
 
-    // Decrypter
+        // Decrypter
 
-    const privateKey = await getInfoDestinataireFromUUID(uuid).then(res => {
-        console.log('Recuperation des informations reussies (private Key )');
-        console.log(res.privateKey);
-        return res.privateKey;
-    }).catch(err => console.log('erreur lors de la recuperation '));
-
-    // Déchiffrer le fichier
-    const decryptedFilePath = decryptFile(fileFromIPFS, privateKey);
-
-    // Save the decrypted file temporarily
-    const fileName = originaName;
-    fs.writeFileSync(path.join(__dirname, fileName), decryptedFilePath);
+        const privateKey = await getInfoDestinataireFromUUID(uuid).then(res => {
+            console.log('Recuperation des informations reussies (private Key )');
+            console.log(res.privateKey);
+            return res.privateKey;
+        }).catch(err => console.log('erreur lors de la recuperation '));
 
 
 
-
-    // Hash du fichier de IPFS
-    const hashFileFromIPFS = await hashFromFile(fileName);
-    console.log('Hash du fichier IPFS : ' +  hashFileFromIPFS);
+        // Déchiffrer le fichier
 
 
-    // Comparer les Hashs
-    if (compareHashes(hashFromBlockChain, hashFileFromIPFS)){
-       // Enregistrer les clés dans Firestore
-        const usersRef = admin.firestore().collection('users');
+        const decryptedFilePath = decryptFile(fileFromIPFS, privateKey);
 
-        // Créer un document pour l'utilisateur avec l'ID correspondant
-        const userDocRef = usersRef.doc(uuid);
-        const userDocSnapshot = await userDocRef.get();
+        // Save the decrypted file temporarily
+        const fileName = originaName;
+        fs.writeFileSync(path.join(__dirname, fileName), decryptedFilePath);
 
-        // Récuperation du Hash de la blockChain
-        let dateFromBlockChain = await getMetaDataFromTx2(tx)
-            .then(res => {
-                console.log('Received dateSent From BlockChain : ' + res)
-                return res;
-            })
-            .catch(err => {
-                console.log('Erreur lors de la récupération des métadonnées de la transaction' + err)
+
+
+        // Hash du fichier de IPFS
+        const hashFileFromIPFS = await hashFromFile(fileName);
+        console.log('Hash du fichier IPFS : ' +  hashFileFromIPFS);
+
+
+        // Comparer les Hashs
+        if (compareHashes(hashFromBlockChain, hashFileFromIPFS)){
+
+            // Verification de la signature
+
+
+            const publicKeyWallet = await getInfoDestinataireFromUUID(uuidSender).then(res => {
+                console.log('Recuperation des informations reussies (public Key Wallet ) : ');
+                console.log(res.publicKeyWallet);
+                return res.publicKeyWallet;
+            }).catch(err => console.log('erreur lors de la recuperation '));
+
+            // Récuperation du Hash de la blockChain
+            let signature = await getSignatureMetaDataFromTx(tx)
+                .then(res => {
+                    console.log('Received Signature From BlockChain : ' + res)
+                    return res;
+                })
+                .catch(err => {
+                    console.log('Erreur lors de la récupération de la Signature de Blockchain' + err)
+                });
+
+            const PKObject = PublicKey.from_bech32(publicKeyWallet);
+            const isSigned = Seed.verifyMessage(PKObject, hashFromBlockChain,signature );
+            console.log("Resultat de la signature : ", isSigned);
+
+
+            // Enregistrer les clés dans Firestore
+            const usersRef = admin.firestore().collection('users');
+
+            // Créer un document pour l'utilisateur avec l'ID correspondant
+            const userDocRef = usersRef.doc(uuid);
+            const userDocSnapshot = await userDocRef.get();
+
+            // Récuperation du Hash de la blockChain
+            let dateFromBlockChain = await getMetaDataFromTx2(tx)
+                .then(res => {
+                    console.log('Received dateSent From BlockChain : ' + res)
+                    return res.dateEnvoie;
+                })
+                .catch(err => {
+                    console.log('Erreur lors de la récupération des métadonnées de la transaction' + err)
+                });
+
+            //ENVOIE A LA BLOCKCHAIN
+
+
+
+
+            /*
+            const message='The file you uploaded has been reccd eived';
+            let currentTime = new Date().toISOString();
+            let txre = await sendToBlockChain3(wallet, walletPassphrase, message, currentTime,dateFromBlockChain).then((result )=>{
+                console.log("Envoie à la blockchain reussie !" );
+                console.log("tx : " + result.id);
+                return result.id;
+            }).catch(e => {
+                console.log('Erreur lors de Envoie à la blockChain');
+                throw new Error("Erreur lors de l'envoie à la blockChain");
+            });
+             */
+
+
+
+
+            const walletID = 'e7bb9863ff00344380165f27a51b3a912d34e76e';
+            const mnemonic="above tornado deposit timber unlock arrive arena liar alert blouse pupil response leisure melody super";
+            const passphrase= "AdminWallet";
+
+            let currentTime = new Date().toISOString();
+            const dateToSend = {
+                fileName : fileName,
+                dateEnvoie : dateFromBlockChain,
+                dateRecu :  currentTime,
+                TransactionHash : tx,
+                HashFichierRecu : hashFileFromIPFS,
+                isAuthentic : true,
+                isSigned: isSigned,
+            }
+
+            let txre = await sendToBlockChain1(walletID, mnemonic, dateToSend).then((result )=>{
+                console.log("Envoie à la blockchain reussie !" );
+                console.log("txre : " + result);
+                return result;
+            }).catch(e => {
+                console.log('Erreur lors de Envoie à la blockChain');
+                console.log(e);
+                throw new Error("Erreur lors de l'envoie à la blockChain");
             });
 
-        //ENVOIE A LA BLOCKCHAIN
+
+            // Accusé de reception :
+            await setAccuseTrue(tx, txre);
 
 
 
 
-        /*
-        const message='The file you uploaded has been reccd eived';
-        let currentTime = new Date().toISOString();
-        let txre = await sendToBlockChain3(wallet, walletPassphrase, message, currentTime,dateFromBlockChain).then((result )=>{
-            console.log("Envoie à la blockchain reussie !" );
-            console.log("tx : " + result.id);
-            return result.id;
-        }).catch(e => {
-            console.log('Erreur lors de Envoie à la blockChain');
-            throw new Error("Erreur lors de l'envoie à la blockChain");
-        });
-         */
+            const userEmail = userDocSnapshot.data().email;
+            var transporter = nodemailer.createTransport({
+                service: process.env.EMAIL_SERVICE,
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASSWORD,
+                }
+            });
+
+            var mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: userEmail,
+                subject: 'SMARTFLOW CARDANO : Accusé de réception',
+                html: `<p>Cher utilisateur,</p>
+           <p>Nous vous informons que le fichier que vous avez téléchargé sur notre système a bien été reçu par le destinataire.</p>
+           <p>Vous pouvez consulter l'accusé de réception en suivant ce lien : <a href='https://preview.cardanoscan.io/transaction/${txre}'>Consulter l'accusé de réception</a>.</p>
+           <p>Vous avez également la possibilité de vous connecter à notre application pour accéder à votre historique complet des fichiers reçus.</p>
+           <p>Cordialement,</p>
+           <p>L'équipe SmartFlow Cardano</p>`
+            };
+
+
+            transporter.sendMail(mailOptions, function(error, info){
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
 
 
 
 
 
+            res.status(200).send({
+                compare: true ,
+                message: "Les identifiants sont identiques",
+                fileName: fileName
+            });
 
-
-        const walletID = 'e7bb9863ff00344380165f27a51b3a912d34e76e';
-        const mnemonic="above tornado deposit timber unlock arrive arena liar alert blouse pupil response leisure melody super";
-        const passphrase= "AdminWallet";
-
-        let currentTime = new Date().toISOString();
-        const dateToSend = {
-            fileName : fileName,
-            dateEnvoie : dateFromBlockChain,
-            dateRecu :  currentTime,
-            TransactionHash : tx,
-            HashFichierRecu : hashFileFromIPFS,
-            isAuthentic : true,
+        }else {
+            res.status(200).send({ compare: false ,message: "Les identifiants sont différents", fileName:fileName});
         }
-
-        let txre = await sendToBlockChain1(walletID, mnemonic, dateToSend).then((result )=>{
-            console.log("Envoie à la blockchain reussie !" );
-            console.log("txre : " + result);
-            return result;
-        }).catch(e => {
-            console.log('Erreur lors de Envoie à la blockChain');
-            console.log(e);
-            throw new Error("Erreur lors de l'envoie à la blockChain");
-        });
-
-
-        // Accusé de reception :
-        await setAccuseTrue(tx, txre);
-
-
-
-
-        const userEmail = userDocSnapshot.data().email;
-        var transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASSWORD,
-            }
-        });
-        var mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: userEmail,
-            subject: 'SMARTFLOW CARDANO : Accusé de récéption',
-            html: `<p>Dear User This is to inform you that the file you uploaded to our system has been received by the receiver.</p><a href={'https://preview.cardanoscan.io/transaction/'+txre}>Consulter Accusé de Reception</a>`
-        };
-
-        transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ' + info.response);
-            }
-        });
-
-
-
-
-
-        res.status(200).send({
-            compare: true ,
-            message: "Les identifiants sont identiques",
-            fileName: fileName
-        });
-
-    }else {
-        res.status(200).send({ compare: false ,message: "Les identifiants sont différents", fileName:fileName});
+    }catch (e){
+        res.status(500).send({ message: "Vous avez pas le droit pour téléchargé ce fichier "});
     }
+
 
 
 });
