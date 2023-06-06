@@ -70,10 +70,14 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
         let mnemonic_sentence = Seed.toMnemonicList(mnemonic);
         let wallet = await walletServer.createOrRestoreShelleyWallet(name,mnemonic_sentence ,passphrase);
         let rootKey = Seed.deriveRootKey(mnemonic);
-        let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
-        let accountKey = Seed.deriveAccountKey(rootKey, 0);
+        const accountKey = Seed.deriveAccountKey(rootKey);
 
+        const stakePrvKey = accountKey
+            .derive(CARDANO_CHIMERIC) // chimeric
+            .derive(0);
 
+        const privateKey = stakePrvKey.to_raw_key();
+        const publicKey = privateKey.to_public();
 
         const data = {
             walletId : wallet.id,
@@ -84,7 +88,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             walletTotalBalance : wallet.getTotalBalance(),
             walletAddress:await wallet.getAddressAt(0),
             privateKey:  privateKey.to_bech32(),
-            publicKey: accountKey.to_bech32(),
+            publicKey: publicKey.to_bech32(),
         }
 
         console.log(data);
@@ -105,8 +109,15 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
             // KEY HANDLING
 
             let rootKey = Seed.deriveRootKey(mnemonic);
-            let privateKey = Seed.deriveKey(rootKey, ['1852H','1815H','0H','0','0']).to_raw_key();
-            let accountKey = Seed.deriveAccountKey(rootKey, 0);
+            const accountKey = Seed.deriveAccountKey(rootKey);
+
+            const stakePrvKey = accountKey
+                .derive(CARDANO_CHIMERIC) // chimeric
+                .derive(0);
+
+            const privateKey = stakePrvKey.to_raw_key();
+            const publicKey = privateKey.to_public();
+
 
             const data = {
                 walletId : wallet.id,
@@ -117,7 +128,7 @@ async function createOrRestoreWallet(name,passphrase, mnemonic){
                 walletTotalBalance : wallet.getTotalBalance(),
                 walletAddress: await wallet.getAddressAt(0),
                 privateKey: privateKey.to_bech32(),
-                publicKey: accountKey.to_bech32(),
+                publicKey: publicKey.to_bech32(),
             }
 
             console.log("deja : ");
