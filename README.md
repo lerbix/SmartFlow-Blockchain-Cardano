@@ -181,3 +181,21 @@ Pour configurer la variable `BLOCKFROST_PROJECT_ID`, vous devez suivre les étap
 
 10. Enregistrez les modifications et utilisez la variable `BLOCKFROST_PROJECT_ID` dans votre application pour interagir avec l'API de BLOCKFROST.
 
+### Configuration NodeMailer
+
+| Variable         | Valeur                |
+| -----------------|-----------------------|
+| EMAIL_SERVICE    | service de messagerie |
+| EMAIL_USER       | votre adresse e-mail  |
+| EMAIL_PASSWORD   | votre mot de passe    |
+
+Pour configurer les variables nécessaires à l'utilisation de NodeMailer, suivez les étapes suivantes :
+
+`EMAIL_SERVICE` : Remplacez `service de messagerie` par le nom du service de messagerie que vous souhaitez utiliser, tel que "Gmail" ou "Outlook". Consultez la documentation de NodeMailer pour obtenir la liste des services de messagerie pris en charge.
+
+`EMAIL_USER` : Remplacez `votre adresse e-mail` par votre adresse e-mail complète. Par exemple, "votre_nom@example.com".
+
+`EMAIL_PASSWORD` : Remplacez `votre mot de passe` par votre mot de passe de messagerie. Assurez-vous de fournir le mot de passe correct associé à l'adresse e-mail spécifiée.
+
+
+
