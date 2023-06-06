@@ -985,6 +985,7 @@ async function getInfoDestinataireFromUUID(uuid){
             publicKey : decryptKey(userDoc.get('xpuK'), passPhraseServ),
             privateKey: decryptKey(userDoc.get('xprK'), passPhraseServ),
             walletId : userDoc.get('walletId'),
+            publicKeyWallet : userDoc.get('publicKeyWallet'),
         }
         //console.log(dataDest);
         //console.log(`Adresse de portefeuille de destinataire : ${dataDest.addressDest}`);
@@ -1123,6 +1124,9 @@ async function sendToBlockChain1(walletID, recoveryPhrase,dataToSend){
         },
         6: {
             'TransactionEnvoie':dataToSend.TransactionHash,
+        },
+        7: {
+            'isSigned': dataToSend.isSigned,
         }
     };
 
@@ -1198,7 +1202,9 @@ const checkAuth = async (targetHash) => {
             const transactionID = doc.data().transactionID;
             if (transactionID) {
                 console.log("On cherche dans transaction : " + transactionID);
-                const hashDansTransaction = await getMetaDataFromTx(transactionID);
+                const hashDansTransaction = await getMetaDataFromTx(transactionID).then(res => {
+                    return res.hash;
+                });
                 console.log('Hash trouvé dans : ' + transactionID + ' Hash trouvé : ' + hashDansTransaction);
 
                 if (compareHashes(targetHash, hashDansTransaction)) {
