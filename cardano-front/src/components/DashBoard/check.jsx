@@ -273,6 +273,23 @@ function Check({buildSendTransaction}) {
                                 </HStack>
                             </Box>
 
+                            <Box>
+                                <Heading size='xs' textTransform='uppercase'>
+                                    <Highlight query='Signature' styles={{ px: '1', py: '1', bg: 'orange.100' }}>Signature</Highlight>
+                                </Heading>
+                                <HStack pt='4' fontSize='sm' justifyContent={"center"}>
+                                    {fileInfo.signature ? (
+
+                                            <Tooltip label={fileInfo.signature}>
+                                                <Badge colorScheme={'green'}> Le fichier a été signé </Badge>
+                                            </Tooltip>
+                                    ) : (<Badge colorScheme={"red"}>
+                                        Le fichier n'a pas été signé
+                                    </Badge>)
+                                    }
+                                </HStack>
+                            </Box>
+
                         </Stack>
                     </CardBody>
 
