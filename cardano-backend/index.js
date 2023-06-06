@@ -493,15 +493,15 @@ app.post('/receive-file2',upload.none(), async (req, res) => {
 
 
 
-    // Récuperation du Hash de la blockChain
-    let hashFromBlockChain = await getMetaDataFromTx(tx)
-        .then(res => {
-            console.log('Received Hash From BlockChain : ' + res)
-            return res;
-        })
-        .catch(err => {
-            console.log('Erreur lors de la récupération des métadonnées de la transaction' + err)
-        });
+        // Récuperation du Hash de la blockChain
+        let hashFromBlockChain = await getMetaDataFromTx(tx)
+            .then(res => {
+                console.log('Received Hash From BlockChain : ' + res.hash)
+                return res.hash;
+            })
+            .catch(err => {
+                console.log('Erreur lors de la récupération des métadonnées de la transaction' + err)
+            });
 
 
 
