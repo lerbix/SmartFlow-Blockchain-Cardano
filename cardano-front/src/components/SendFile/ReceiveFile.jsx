@@ -108,9 +108,9 @@ const FileReceiver = () => {
                 setIsLoading(false);
 
                 toast({
-                    title: 'Erreur Serveur',
+                    title: 'Accée refusé au fichier',
                     status: "error",
-                    duration: 3000,
+                    duration: 10000,
                     isClosable: true,
                 })
 
