@@ -815,6 +815,7 @@ app.post('/check-file', upload.single('file'), async (req, res) => {
                 hashFileRecu : metaData.find(i=>i.label === '5').json_metadata.hashFileRecu,
                 transactionHash : metaData.find(i=>i.label === '6').json_metadata.TransactionEnvoie,
                 transactionAccuse : TxAcusse,
+                signature : await getSignatureMetaDataFromTx(metaData.find(i=>i.label === '6').json_metadata.TransactionEnvoie),
             }
 
 
@@ -879,6 +880,14 @@ async function getMetaDataFromTx2(tx){
     let  {json_metadata} = metadata[1];
     const datesent = json_metadata;
     return datesent;
+}
+
+async function getSignatureMetaDataFromTx(tx){
+    const metadata = await API.txsMetadata(tx);
+    let  metadatum3 = metadata[3];
+    let  metadatum4 = metadata[4];
+    const signature = metadatum3.json_metadata.SignaturePartA + metadatum4.json_metadata.SignaturePartB
+    return signature;
 }
 
 async function getAllMetaData(tx){
