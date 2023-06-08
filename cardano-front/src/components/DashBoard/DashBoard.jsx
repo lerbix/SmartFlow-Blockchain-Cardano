@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc} from "firebase/firestore";
+import {getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs} from "firebase/firestore";
 import firebaseConfig from "../../utils/firebaseConfig.js";
-import {Badge, Box, Button, Card, Container, Heading, HStack, Spinner} from "@chakra-ui/react";
+import {
+    Badge,
+    Box,
+    Button,
+    Card,
+    Container,
+    Heading,
+    HStack,
+    Spinner,
+    Text
+} from "@chakra-ui/react";
 import AuthenticationService from "../../services/AuthenticationService.js";
 
 // Initialize Firebase
@@ -21,6 +31,8 @@ const Dashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [isWalletConnected, setIsWalletConnected] = useState(false);
+    const [nbFichiersEnvoi, setnbFichiersEnvoi] = useState(0);
+    const [nbFichierRecu, setnbFichiersRecu] = useState(0);
 
 
 
@@ -52,6 +64,29 @@ const Dashboard = () => {
 
         return () => unsubscribe();
     }, []);
+
+    useEffect( () => {
+        const fetchCountFile = async (userEmail, fieldPath) => {
+            const fileHistoryRef = collection(db, 'fileHistory');
+            const q = query(fileHistoryRef, where(fieldPath, '==', userEmail));
+            const querySnapshot = await getDocs(q);
+            const fileHistory = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            return fileHistory.length;
+        };
+
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setnbFichiersEnvoi(await fetchCountFile(user.email,'senderEmail'));
+                setnbFichiersRecu(await fetchCountFile(user.email, 'receiverEmail'));
+            }
+        });
+
+        return () => unsubscribe();
+
+    }, [user]);
 
     const handleLogout = async () => {
         try {
@@ -101,6 +136,14 @@ const Dashboard = () => {
                                 ) : (
                                     <Badge  colorScheme="red"> Wallet not linked</Badge>
                                 )}
+                            </p>
+                            <p >
+                                <Text>Fichiers Envoyés :  <Badge>{nbFichiersEnvoi}</Badge> </Text>
+
+                            </p>
+                            <p >
+                                <Text>Fichiers Reçus :  <Badge>{nbFichierRecu}</Badge> </Text>
+
                             </p>
 
 
