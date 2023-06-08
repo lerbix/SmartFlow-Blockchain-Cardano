@@ -115,7 +115,6 @@ const FileSentHistory = () => {
                 <Thead>
                     <Tr>
                         <Th>Fichier</Th>
-                        <Th>Email expéditeur</Th>
                         <Th>Email destinataire</Th>
                         <Th>Transaction ID</Th>
                         <Th>IPFS CID</Th>
@@ -127,7 +126,6 @@ const FileSentHistory = () => {
                     {currentItems.map((entry, index) => (
                         <Tr key={index}>
                             <Td>{entry.nomFichier}</Td>
-                            <Td>{entry.senderEmail}</Td>
                             <Td>{entry.receiverEmail}</Td>
                             <Td>
                                 <Link target="_blank" rel="noopener noreferrer" href={`https://preview.cardanoscan.io/transaction/${entry.transactionID}`}>
@@ -140,7 +138,7 @@ const FileSentHistory = () => {
                                 </Link>
                             </Td>
                             <Td>{entry.dateSent}</Td>
-                            <Td>
+                            <Td >
 
                                 {entry.receiptAcknowledged ? (
                                     <VStack>
